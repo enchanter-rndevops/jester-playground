@@ -1,7 +1,7 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.unreliableforge.sandbox00</groupId>
+  <groupId>dev.enchanter.rndevops.jester.playground</groupId>
   <artifactId>e2e</artifactId>
   <version>0.0.1</version>
 

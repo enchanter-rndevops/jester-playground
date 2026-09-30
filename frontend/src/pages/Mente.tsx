@@ -38,6 +38,7 @@ function generateFakeJwt(sub: string, email?: string) {
 
 function Page() {
   const [sub, setSub] = useState("");
+  const [result, setResult] = useState("");
 
   const login = async () => {
     const fakeJwt = generateFakeJwt(sub);
@@ -49,21 +50,27 @@ function Page() {
     console.log(fakeJwt);
     console.log(body);
 
-    await fetch("/api/v1/session", {
+    const r = await fetch("/api/v1/session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
+
+    const x = await r.text();
+    setResult(`${r.status}${x}`);
   };
 
   const whoami = async () => {
     const body = {};
     console.log(body);
-    await fetch("/api/v1/whoami", {
+    const r = await fetch("/api/v1/whoami", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
+
+    const x = await r.text();
+    setResult(`${r.status}${x}`);
   };
 
   return (
@@ -81,6 +88,10 @@ function Page() {
         <div>
           <button onClick={whoami}>Whoami</button>
         </div>
+      </div>
+
+      <div>
+        <div>{result}</div>
       </div>
     </>
   );

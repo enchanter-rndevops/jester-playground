@@ -7,6 +7,8 @@
 # $ VITE_USE_MOCK=true npm run dev
 # external VITE_USE_MOCK=true で設定しないこと。
 
+# composeはbackendに移動。
+
 name: sandbox00
 
 services:

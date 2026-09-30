@@ -1,6 +1,4 @@
-# UnreliableForge
-
-**We forge reliable systems from unreliable worlds.**
+# Enchanter Research and DevOps.
 
 このリポジトリは、特定のアーキテクチャや設計手法の検証・比較を行うための実験場です。
 「最初はこう実装したが、〇〇の理由から最終的に別のアプローチに変更した」といった、設計の試行錯誤のプロセスを記録しています。

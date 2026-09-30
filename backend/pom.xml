@@ -7,9 +7,9 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>4.1.0</version>
-		<relativePath /> <!-- lookup parent from repository -->
+		<relativePath />
 	</parent>
-	<groupId>com.unreliableforge.sandbox00</groupId>
+	<groupId>dev.enchanter.rndevops.jester.playground</groupId>
 	<artifactId>backend</artifactId>
 	<version>0.0.1</version>
 	<name />
@@ -30,10 +30,6 @@
 	<properties>
 		<java.version>25</java.version>
 		<skipTests>true</skipTests>
-		<jdbcDriverClass>com.mysql.cj.jdbc.Driver</jdbcDriverClass>
-		<jdbcUrl>jdbc:mysql:// localhost:3306/ sandbox00?useSSL=false</jdbcUrl>
-		<jdbcUsername>sandbox</jdbcUsername>
-		<jdbcPassword>sandbox</jdbcPassword>
 	</properties>
 
 	<dependencies>
@@ -73,14 +69,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
 		</dependency>
-		<!--
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-oauth2-jose</artifactId>
-			<version>7.1.1</version>
-			<scope>compile</scope>
-		</dependency>
-    -->
 		<dependency>
 			<groupId>org.mybatis.spring.boot</groupId>
 			<artifactId>mybatis-spring-boot-starter</artifactId>

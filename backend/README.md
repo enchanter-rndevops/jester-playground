@@ -195,7 +195,7 @@ severityはエラー内容により変更可能。
 同じ値をCloudWatchLogにエラーメッセージとともに出力することで検索が簡単にできるようにする。
 
 messageとエラーハッシュを分けることを考えたけど、サーバーが返すメッセージなんてe.getMessage()の値くらいしか入れるものがないし、そんなものを表示しても意味がない。
-というわけで、messageでいいかな。
+というわけで、messageでいいか。
 
 ```
 {
@@ -215,24 +215,26 @@ DynamicSQLの使用を検討していましたが、メリットがないので�
 自動生成されるソースは mybatls3simple なので、アノテーションベースとなります。
 
 - 直接SQLを書いて実装する場合がほとんど。わざわざDynamicSQLに置き換えるという手間をかける意味がない。
-- アノテーションベースのSQL BuilderならDynamicSQLよりは置き換えが楽。場合により、SQLをほぼそのまま使うことができる。
+- 開発を行う場合は、検索部分は直接SQLを書くことが多い。アノテーションベースのSQL BuilderならDynamicSQLよりは置き換えが楽。
 - DynamicSQLでは型チェックが働くというメリットもあるが、デメリットが上回る。
+- そもそも型チェックが緩いSQLで厳密に型チェックをしたところであまり意味がないのでは？
 
 ### 自動生成
 
 MyBATIS generatorを使い、基本的なCRUDクラスを自動生成します。
 このクラスは、
-com/unreliableforge/sandbox00/backend/domain/generated
+jester-playground/backend/src/main/java/dev/enchander/rndevops/jester/playground/backend/domain/generated
 に生成されます。
 
 ```
 $ ./mvnw mybatis-generator:generate
 ```
 
+
 ### 運用
 
 自動生成されたMapperは、Serviceクラスなどから直接使用することを禁止します。
-com/unreliableforge/sandbox00/backend/domain/extension/repository
+jester-playground/backend/src/main/java/dev/enchander/rndevops/jester/playground/backend/domain/extension/repository
 にRepositoryクラスを作成し、そのクラス経由でMapperを使用すること。
 
 DynamicSQLを使わないので、この制約もあまり意味をもたなくなったけど、この制約はあるほうがいい。
@@ -268,11 +270,12 @@ DynamicSQLを使った実装よりは格段に楽でしょう。
 
 残っているめんどくさい手順は、SELECT からエンティティを生成する部分だけ。
 
-エンティティ。com/unreliableforge/sandbox00/backend/domain/extension/entity
+エンティティ。
+jester-playground/backend/src/main/java/dev/enchander/rndevops/jester/playground/backend/domain/extension/entity
 
 RepositoryのDB操作メソッドの戻り値。ほとんどの場合、SELECT <この部分と同じ>
 
-リポジトリ。com/unreliableforge/sandbox00/backend/domain/extension/repository
+リポジトリ。jester-playground/backend/src/main/java/dev/enchander/rndevops/jester/playground/backend/domain/extension/repository
 ここで実装するのは、以下のうちのいづれか。
 
 - 自動生成Mapperのリポジトリ
@@ -358,3 +361,62 @@ RepositoryのDB操作メソッドの戻り値。ほとんどの場合、SELECT <
       }
   }
   ```
+
+
+## メモ
+
+APIのエントリポイントはパスで区別している。
+APIのエントリポイントはパスで区別する必要はなく、エントリポイントは一か所とし、関数をリクエストボディで指定することができる。
+
+例) POST /api/v1 (APIのエントリポイントはここだけ)。
+```json
+{
+  "function" : "関数名",
+  "args" : {
+    "パラメータ1": "値1"
+  }
+}
+```
+
+この方法はデメリットも大きいため、今回は採用しない。
+
+メソッドチェーンみたいなことができるのではないかと思う。
+
+こんな感じで、連続して実行する関数を指定する。
+関数2は、関数1の結果を受け取り、それに対する処理を行う。
+```json
+{
+  "chains" : [
+    { "function" : "関数1" : "args" : {"パラメータ1": "値1"}},
+    { "function" : "関数2" : "args" : {"パラメータ1": "値1"}},
+  ]
+}
+```
+
+こうすることで、サーバー側は関数1を処理し、その結果を関数2に渡して処理といったことを行う。
+エラーハンドリングやトランザクション境界とか、問題は多く、実用にはならないとは思うけど、ちょっと考えてみるのも面白いかもしれない。
+シェルでリダイレクトやパイプがあるが、それと似たような仕組みを取り入れてみたり。
+関数間でのデータのやり取りは、PowerShellのようなオブジェクトでやりとりしてみたり。
+
+そんなことをするくらいなら、IndexedDB(または、それに似たもの)でいいのでは。処理のほとんどは大きなリストをなんらかの形に加工するといったものだろうから。
+ということを思ったので、先にそっちをを試してみたい。
+
+あるいは、Javaでこんな感じのコードがあるとする。
+クラス内に生成するものを設定し、最後にbuildで結果を生成するというよくあるパターン。
+```
+  http.csrf(csrf -> csrf.disable())
+    .formLogin(form -> form.disable())
+    .httpBasic(basic -> basic.disable())
+  return http.build();
+```
+
+JSONで再現してみる。
+```
+{
+  "クラス名" : [
+    { "function" : "constructor" : "args" : {"パラメータ1": "値1"}},
+    { "function" : "関数1" : "args" : {"パラメータ1": "値1"}},
+    { "function" : "関数2" : "args" : {"パラメータ1": "値1"}},
+  ]
+}
+```

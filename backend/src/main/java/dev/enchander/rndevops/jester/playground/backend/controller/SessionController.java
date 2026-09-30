@@ -1,0 +1,152 @@
+package dev.enchander.rndevops.jester.playground.backend.controller;
+
+import java.io.IOException;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AuthorizationServiceException;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTParser;
+
+import dev.enchander.rndevops.jester.playground.backend.constant.Severity;
+import dev.enchander.rndevops.jester.playground.backend.properties.CognitoProperties;
+import dev.enchander.rndevops.jester.playground.backend.repository.records.ApiResponse;
+import dev.enchander.rndevops.jester.playground.backend.service.SessionService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+
+record SessionRequestBody(
+        String idToken) {
+}
+
+@RestController
+@RequestMapping("/api")
+@Slf4j
+public class SessionController {
+
+    @Autowired
+    private SessionService sessionService;
+
+    @Autowired
+    private TokenVerifier tokenVerifier;
+
+    @PostMapping("/v1/session")
+    public ResponseEntity<?> session(HttpServletRequest request, HttpServletResponse response,
+            @RequestBody SessionRequestBody body) throws IOException {
+        String idToken = body.idToken();
+
+        Map<?, ?> decoded = tokenVerifier.verify(idToken);
+
+        if (decoded == null || decoded.get("sub") == null) {
+            throw new AuthorizationServiceException("認証されていません");
+        }
+
+        // sub を取り出す
+        String sub = String.valueOf(decoded.get("sub"));
+
+        // セッション発行
+        String sessionId = sessionService.createSession(sub);
+
+        log.debug("Session ID:" + sessionId);
+        var responseBody = new ApiResponse<Void>(Severity.SUCCESS, "OK");
+        return ResponseEntity.ok(responseBody);
+    }
+}
+
+/**
+ * IDTokenを検証する。
+ * 環境（SpringProfilesActive）により実装を切り替えるため、interface.
+ * TokenVerifier
+ */
+interface TokenVerifier {
+
+    public Map<String, Object> verify(String idToken);
+
+}
+
+@Component
+@Profile("aws")
+class CognitoTokenVerifier implements TokenVerifier {
+
+    @Autowired
+    private CognitoProperties cognitoProperties;
+
+    private final JwtDecoder jwtDecoder;
+
+    public CognitoTokenVerifier() {
+        this.jwtDecoder = NimbusJwtDecoder
+                .withJwkSetUri(cognitoProperties.url())
+                .build();
+    }
+
+    @Override
+    public Map<String, Object> verify(String idToken) {
+
+        Jwt jwt = jwtDecoder.decode(idToken);
+
+        // iss, aud(clientid)の検証をここで行う。
+        if (cognitoProperties.audience().equals(jwt.getAudience().getFirst())) {
+            return null;
+            // throw new RuntimeException("Invalid token");
+        }
+
+        if (cognitoProperties.issuer().equals(jwt.getIssuer().toString())) {
+            return null;
+            // throw new RuntimeException("Invalid token");
+        }
+
+        return jwt.getClaims();
+    }
+}
+
+@Component
+@Profile("local")
+class LocalTokenVerifier implements TokenVerifier {
+
+    @Autowired
+    private CognitoProperties cognitoProperties;
+
+    @Override
+    public Map<String, Object> verify(String idToken) {
+        try {
+            // 署名検証なしで JWT をパース
+            // SignedJWT jwt = SignedJWT.parse(idToken);
+            JWT jwt = JWTParser.parse(idToken);
+
+            // ここで iss,audを検証する必要はないが、サンプルとして。
+            // if
+            // (cognitoProperties.audience().equals(jwt.getJWTClaimsSet().getAudience().getFirst()))
+            // {
+            // return null;
+            // // throw new RuntimeException("Invalid local token");
+            // }
+
+            // if (cognitoProperties.issuer().equals(jwt.getJWTClaimsSet().getIssuer())) {
+            // return null;
+            // // throw new RuntimeException("Invalid local token");
+            // }
+
+            if (jwt == null) {
+                return null;
+            }
+
+            return jwt.getJWTClaimsSet().getClaims();
+        } catch (Exception e) {
+            return null;
+            // throw new RuntimeException("Invalid local token", e);
+
+        }
+    }
+}

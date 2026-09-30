@@ -1,6 +1,6 @@
 
 CREATE TABLE users (
-    sub CHAR(36) NOT NULL COMMENT 'Cognitoが生成するsub',
+    sub VARCHAR(36) NOT NULL COMMENT 'Cognitoが生成するsub',
     email VARCHAR(255) NOT NULL COMMENT 'メールアドレス',
     name VARCHAR(255) NOT NULL COMMENT '名前',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',

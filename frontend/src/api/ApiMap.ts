@@ -1,4 +1,4 @@
-// 型安全なuseQuery. そのうち useMutation も作りましょう。
+// 型安全なuseQuery.
 
 export type ApiMap = {
   // APIのパス。Controllerからいい感じに自動生成するようにしたい。
@@ -10,10 +10,25 @@ export type ApiMap = {
     // @Nullable → TS では string | null
     // Optional<T> → TS では T | null
     //とすることである程度自動化できる。nullよりはundefinedのほうがいいかもしれない。
-    input: any | undefined;
-    output: any;
+    request: any | undefined;
+    response: any;
+  };
+  "v1/session": {
+    request: any | undefined;
+    response: any;
+  };
+  "v1/whoami": {
+    request: undefined;
+    response: {
+      severity: string;
+      message: string;
+      data: {
+        sub: string;
+        email: string;
+        name: string;
+        createdAt: string;
+      };
+      invalid: undefined;
+    };
   };
 };
-
-// 型安全な useQueryを使う。使い方は tanstackのuseQueryと同じ。
-// useApiQuery("v1/hello", { param1: "A" });

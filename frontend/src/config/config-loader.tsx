@@ -4,6 +4,7 @@ import { load } from "js-yaml";
 
 export type AppConfig = {
   apiBaseUrl: string;
+  cognitoUrl: string;
 };
 
 let cachedConfig: AppConfig | null = null;

@@ -5,13 +5,6 @@ import { useQueryClient } from "@tanstack/react-query";
 export default function Page() {
   const queryClient = useQueryClient();
 
-  // データ取得。tanstackのuseQueryをそのまま使う。
-  // const useHello = () => {
-  //   return useQuery({
-  //     queryKey: ["v1/hello", "GET", { param1: "A" }],
-  //   });
-  // };
-
   // 型安全なuseQuery. 今は型がanyとなっているので、あまり意味がない。
   // param : any となっているところは、ApiMapで定義されているものを指定すること。useApiQueryパラメータ[1]が型エラーになります。
   const useHello = (param: any) => {
@@ -19,7 +12,6 @@ export default function Page() {
   };
 
   // 値が変わったらAPIを呼ぶようにするには、useStateとか使う。
-  // Reactのふつうの使い方なので、詳しく書かない。
   const { data, isLoading, isError, refetch } = useHello(undefined);
 
   console.log(data);

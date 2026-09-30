@@ -2,8 +2,10 @@
 // import { Tabs } from "@base-ui/react";
 //import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@base-ui/react";
+import { useState } from "react";
 import { Link, Outlet } from "react-router-dom";
 import { setMockError } from "./__tests__/utils/mock-query-client";
+import { LoginDialog } from "./dialogs/LoginDialog";
 
 // 成功パターン
 setMockError(false);
@@ -24,6 +26,8 @@ const applyTheme = (themeName: "default" | "light" | "dark" | "MSX1") => {
 export function Layout() {
   // const navigate = useNavigate();
   // const location = useLocation();
+
+  const [open, useSetOpen] = useState(false);
 
   /*
   Tabsを使ってパスごとにヘッダを変更。
@@ -56,48 +60,63 @@ export function Layout() {
   const localenv = import.meta.env.VITE_LOCAL === "true" ? "LOCAL MODE. " : "";
 
   return (
-    <div className="h-screen">
-      {/* --- Top Bar --- */}
-      <header className="header-area fixed top-0 right-0 left-0 h-16 flex-row items-center border-b border-gray-200 px-4">
-        <div className="flex">
-          <div className="basis-14/16">SAMPLE APPLICATION.</div>
-          <div className="basis-2/12">
-            <Button className="" onClick={() => applyTheme("default")}>
-              標準
-            </Button>
-            <Button className="" onClick={() => applyTheme("MSX1")}>
-              MSX1
-            </Button>
+    <>
+      <LoginDialog open={open} onOpenChange={useSetOpen}></LoginDialog>
+      <div className="h-screen">
+        {/* --- Top Bar --- */}
+        <header className="header-area fixed top-0 right-0 left-0 h-16 flex-row items-center border-b border-gray-200 px-4">
+          <div className="flex">
+            <div className="basis-12/16">
+              <h1>Jester Playground.</h1>
+            </div>
+            <div className="basis-2/16">
+              <Button
+                onClick={(e) => {
+                  useSetOpen(true);
+                }}
+              >
+                Sign in
+              </Button>
+            </div>
+            <div className="basis-2/16">
+              <Button className="" onClick={() => applyTheme("default")}>
+                標準
+              </Button>
+              <Button className="" onClick={() => applyTheme("MSX1")}>
+                MSX1
+              </Button>
+            </div>
           </div>
-        </div>
-      </header>
-      <main className="main-area h-full overflow-auto pt-16 pb-16">
-        {/* --- Main Area: Left Menu + Content --- */}
-        <div className="main-leftside-area flex h-full flex-1 overflow-hidden">
-          {/* Left Menu */}
-          <aside className="w-64 overflow-auto border-r border-gray-200 p-4">
-            <div>左メニュー</div>
-            <div>
-              <Link to={"/"}>HOME</Link>
-            </div>
-            <div>
-              <Link to={"./about"}>about</Link>
-            </div>
-            <div>
-              <Link to={"./section1"}>Section1</Link>
-            </div>
-          </aside>
-          {/* Content Area */}
-          <main className="main-content-area flex-1 overflow-auto p-4">
-            <Outlet />
-          </main>
-        </div>
-      </main>
-      {/* --- Bottom Bar --- */}
-      <footer className="footer-area mixed fixed right-0 bottom-0 left-0 h-16 items-center border-t border-gray-200 px-4">
-        MADE BY UnreliableForge. {useMock} {toggleAlwaysError} {localenv}
-      </footer>
-    </div>
+        </header>
+        <main className="main-area h-full overflow-auto pt-16 pb-16">
+          {/* --- Main Area: Left Menu + Content --- */}
+          <div className="main-leftside-area flex h-full flex-1 overflow-hidden">
+            {/* Left Menu */}
+            <aside className="w-64 overflow-auto border-r border-gray-200 p-4">
+              <div>左メニュー</div>
+              <div>
+                <Link to={"/"}>HOME</Link>
+              </div>
+              <div>
+                <Link to={"./about"}>about</Link>
+              </div>
+              <div>
+                <Link to={"./section1"}>Section1</Link>
+              </div>
+            </aside>
+            {/* Content Area */}
+            <main className="main-content-area flex-1 overflow-auto p-4">
+              <Outlet />
+            </main>
+          </div>
+        </main>
+        {/* --- Bottom Bar --- */}
+        <footer className="footer-area mixed fixed right-0 bottom-0 left-0 h-16 items-center border-t border-gray-200 px-4">
+          MADE BY Enchanter-Research and DevOps. {useMock} {toggleAlwaysError}{" "}
+          {localenv}
+        </footer>
+      </div>
+    </>
   );
 
   // return (

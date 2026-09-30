@@ -3,7 +3,7 @@
 # 同時に起動できるようにするため、ポート番号を変更しています。
 # ビルドは行わないので、あらかじめビルドしておくこと。
 
-name: sandbox00R
+name: jester-playground-R
 
 services:
 

@@ -1,6 +1,6 @@
 # このファイルはbackendにある。このままだと、ボリューム名やコンテナ名に backendとついてしまう。
 # わかりにくいので、nameを指定するする。
-name: sandbox00
+name: jester-playground
 
 services:
   # tagdb:
@@ -31,7 +31,28 @@ services:
         condition: service_healthy
     command: ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     networks:
-      - sandbox00
+      - jester
+    healthcheck:
+      test:
+          ["CMD", "curl", "localhost:8080"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # frontendからbackendのAPIを呼ぶための CloudFront エミュレーション nginxの起動。
+  # npm run devでfrontendを起動していること。
+  nginx:
+    image: public.ecr.aws/nginx/nginx:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - jester
+    depends_on:
+        backend:
+          condition: service_healthy
 
   db:
     image: public.ecr.aws/docker/library/mysql:8.4
@@ -42,9 +63,9 @@ services:
     #container_name: db
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: sandbox00
-      MYSQL_USER: sandbox
-      MYSQL_PASSWORD: sandbox
+      MYSQL_DATABASE: jester
+      MYSQL_USER: jester
+      MYSQL_PASSWORD: jester
     ports:
       - "3306:3306"
     volumes:
@@ -57,18 +78,14 @@ services:
       retries: 10
       start_period: 10s
     networks:
-      - sandbox00
+      - jester
 
 # vloume名は、先頭にプロジェクト名がつく。
-# ここで言うプロジェクト名は、docker composeを実行したディレクトリ名となるので、同じcomposeファイルでも
-# cd ~/sandbox00; docker compose -f backend/compose.yaml up -d
-# cd ~/sandbox00/backend; docker compose up -d
-# とした場合でボリューム名が異なることに注意。
 volumes:
   db_data:
 #  tag_data:
 
 networks:
-  sandbox00:
+  jester:
     external: true
-    name: sandbox00
+    name: jester
