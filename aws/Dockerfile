@@ -3,11 +3,11 @@
 # tarとかgzipも入ってしまうし、最小のimageから作成しないので、イメージサイズが大きめになる。あまり気にしない。
 # FROM イメージはAWS ECRにアップロードするので、アカウントを作ったら変更しましょう。
 # AWSではcomposeファイルはありません。
-FROM backend00-dev:latest 
+FROM backend-dev:latest 
 
 WORKDIR /app
 COPY ./backend.jar backend.jar
-ENV SPRING_PROFILES_ACTIVE=AWS
+ENV SPRING_PROFILES_ACTIVE=aws
 # 環境変数ENVは、ECS, Lambda上で設定するので、ここでは行わない。
 
 ENTRYPOINT ["java", "-jar", "backend.jar"]

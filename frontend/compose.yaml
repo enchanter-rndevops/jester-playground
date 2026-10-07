@@ -9,7 +9,7 @@
 
 # composeはbackendに移動。
 
-name: sandbox00
+name: jester-playground
 
 services:
   # localhost:8000 -> frontend
@@ -23,11 +23,11 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
     networks:
-      - sandbox00
+      - jester
 
 # networkはあらかじめ作成しておくこと。
 # なぜかexternalのnetworkはcomposeで自動で作成する方法がないらしい。
 networks:
-  sandbox00:
+  jester:
     external: true
-    name: sandbox00
+    name: jester

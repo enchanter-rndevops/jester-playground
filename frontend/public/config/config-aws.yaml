@@ -1,1 +1,2 @@
-cognitoUrl: /api/v1/localauth
+# このファイルは、デプロイ時に config.yaml に上書きします。
+env: dev

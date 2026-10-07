@@ -5,6 +5,7 @@ import { mockApiClient } from "@testutils/mock-api-client";
 import { mockQueryClient } from "@testutils/mock-query-client";
 import { apiClient } from "@utils/ApiClient";
 import { queryClient } from "@utils/QueryClient";
+import { Amplify } from "aws-amplify";
 import type { AxiosInstance } from "axios";
 import { createContext, StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
@@ -25,6 +26,15 @@ const client =
   import.meta.env.VITE_USE_MOCK === "true" ? mockQueryClient : queryClient;
 const api =
   import.meta.env.VITE_USE_MOCK === "true" ? mockApiClient : apiClient;
+
+Amplify.configure({
+  Auth: {
+    Cognito: {
+      userPoolId: "ap-northeast-1_OgaYp5bZA",
+      userPoolClientId: "6d0hpf8q6tb3lmmcerberi3969",
+    },
+  },
+});
 
 export const ApiClientContext = createContext<AxiosInstance | null>(null);
 

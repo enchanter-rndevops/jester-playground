@@ -24,10 +24,9 @@ const applyTheme = (themeName: "default" | "light" | "dark" | "MSX1") => {
 };
 
 export function Layout() {
-  // const navigate = useNavigate();
-  // const location = useLocation();
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-  const [open, useSetOpen] = useState(false);
+  console.log(dialogOpen);
 
   /*
   Tabsを使ってパスごとにヘッダを変更。
@@ -61,7 +60,7 @@ export function Layout() {
 
   return (
     <>
-      <LoginDialog open={open} onOpenChange={useSetOpen}></LoginDialog>
+      <LoginDialog open={dialogOpen} onOpenChange={setDialogOpen} />
       <div className="h-screen">
         {/* --- Top Bar --- */}
         <header className="header-area fixed top-0 right-0 left-0 h-16 flex-row items-center border-b border-gray-200 px-4">
@@ -70,13 +69,7 @@ export function Layout() {
               <h1>Jester Playground.</h1>
             </div>
             <div className="basis-2/16">
-              <Button
-                onClick={(e) => {
-                  useSetOpen(true);
-                }}
-              >
-                Sign in
-              </Button>
+              <Button onClick={() => setDialogOpen(true)}>Sign in</Button>
             </div>
             <div className="basis-2/16">
               <Button className="" onClick={() => applyTheme("default")}>
@@ -112,39 +105,10 @@ export function Layout() {
         </main>
         {/* --- Bottom Bar --- */}
         <footer className="footer-area mixed fixed right-0 bottom-0 left-0 h-16 items-center border-t border-gray-200 px-4">
-          MADE BY Enchanter-Research and DevOps. {useMock} {toggleAlwaysError}{" "}
+          MADE BY Enchanter-Research and DevOps. {useMock} {toggleAlwaysError}
           {localenv}
         </footer>
       </div>
     </>
   );
-
-  // return (
-  //   <div className="root">
-  //     <div className="flex flex-col h-screen">
-  //       {/* --- Header Navigation (Tabs) --- */}
-
-  //       <Tabs.Root
-  //         value={location.pathname}
-  //         onValueChange={(val) => navigate(val)}
-  //         className="border-b border-gray-200 px-4"
-  //       >
-  //         <Tabs.Panel value="/" className="px-4 py-2">
-  //           Home
-  //         </Tabs.Panel>
-  //         <Tabs.Panel value="/about" className="px-4 py-2">
-  //           About
-  //         </Tabs.Panel>
-  //       </Tabs.Root>
-
-  //       {/* --- Main Content --- */}
-  //       <div>
-  //         Here is main Content.
-  //         <div className="flex-1 overflow-auto p-4">
-  //           <Outlet />
-  //         </div>
-  //       </div>
-  //     </div>
-  //   </div>
-  // );
 }

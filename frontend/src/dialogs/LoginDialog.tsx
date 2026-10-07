@@ -1,18 +1,9 @@
-import { Button, Dialog, Field, Form } from "@base-ui/react";
-import { ConfigContext } from "@config/config-context";
-import { useContext } from "react";
+import { Dialog } from "@base-ui/react";
+import LoginForm from "./LoginForm";
 
 export function LoginDialog(props: Dialog.Root.Props) {
-  // const { data, isLoading, isError, refetch } = useApiQuery(
-  //   ["v1/session", undefined],
-  //   { enabled: false },
-  // );
-
   const open = props.open;
   const setDialogOpen = props.onOpenChange;
-
-  const config = useContext(ConfigContext);
-  const cognitoUrl = config?.cognitoUrl;
 
   return (
     <>
@@ -24,59 +15,7 @@ export function LoginDialog(props: Dialog.Root.Props) {
               <div>
                 <Dialog.Title>Jester Playground Sign in.</Dialog.Title>
                 <Dialog.Description>
-                  <Form
-                    onSubmit={async (event) => {
-                      event.preventDefault();
-                      const formData = new FormData(event.currentTarget);
-                      const username = formData.get("username") as string;
-                      const password = formData.get("password") as string;
-
-                      console.log(formData.keys());
-                      console.log(username);
-                      console.log(password);
-                      // 2. ローカル偽Cognitoへログイン
-                      const res = await fetch(`${cognitoUrl}`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ username, password }),
-                      });
-
-                      const { IdToken } = await res.json();
-
-                      console.log(IdToken);
-
-                      const sessionRes = await fetch(`/api/v1/session`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        credentials: "include",
-                        body: JSON.stringify({ idToken: IdToken }),
-                      });
-
-                      console.log(sessionRes.json());
-                    }}
-                  >
-                    <Field.Root name="username">
-                      <Field.Control
-                        type="text"
-                        required
-                        defaultValue=""
-                        placeholder="User Id"
-                        className="h-8 w-full border border-neutral-950 bg-white px-2 text-sm font-normal text-neutral-950 placeholder:text-neutral-500 focus:outline-2 focus:-outline-offset-1 focus:outline-neutral-950 dark:border-white dark:bg-neutral-950 dark:text-white dark:placeholder:text-neutral-400 dark:focus:outline-white any-pointer-coarse:text-base"
-                      />
-                    </Field.Root>
-                    <Field.Root name="password">
-                      <Field.Control
-                        type="password"
-                        required
-                        defaultValue=""
-                        placeholder="password"
-                        className="h-8 w-full border border-neutral-950 bg-white px-2 text-sm font-normal text-neutral-950 placeholder:text-neutral-500 focus:outline-2 focus:-outline-offset-1 focus:outline-neutral-950 dark:border-white dark:bg-neutral-950 dark:text-white dark:placeholder:text-neutral-400 dark:focus:outline-white any-pointer-coarse:text-base"
-                      />
-                    </Field.Root>
-                    <div>
-                      <Button type="submit">Sign in</Button>
-                    </div>
-                  </Form>
+                  <LoginForm />
                   <Dialog.Close>Close</Dialog.Close>
                 </Dialog.Description>
               </div>

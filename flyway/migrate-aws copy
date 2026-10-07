@@ -1,0 +1,9 @@
+FLYWAY_PASSWORD=$(aws rds generate-db-auth-token \
+  --hostname enchanter-rds.cx2c4awkaqk4.ap-northeast-1.rds.amazonaws.com \
+  --port 3306 \
+  --region ap-northeast-1 \
+  --username jester_iam) \
+FLYWAY_URL="jdbc:mysql://host.docker.internal:13306/jester?useSSL=true&trustCertificateKeyStoreUrl=file:/flyway/truststore.jks&trustCertificateKeyStorePassword=changeit&&passwordCharacterEncoding=utf8" \
+FLYWAY_USER=jester_iam \
+FLYWAY_PASSWORD=$FLYWAY_PASSWORD \
+docker compose run --rm flyway migrate

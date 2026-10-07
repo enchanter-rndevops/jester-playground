@@ -1,6 +1,6 @@
-# SANDBOX00 E2Eテスト
+# Jester Playgorund E2Eテスト
 
-SANDBOX00をローカルでE2Eテストを行う。
+Jester PlaygorundをローカルでE2Eテストを行う。
 最終的にはAWS上で行う。
 ローカルでの環境を作成しておくことで、環境作成のための理解を深める。
 

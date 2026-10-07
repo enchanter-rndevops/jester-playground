@@ -1,4 +1,4 @@
-# SANDBOX00 BACKEND application
+# Jester Playground BACKEND application
 
 簡単なJSONを返すだけのSpringBootアプリ。
 

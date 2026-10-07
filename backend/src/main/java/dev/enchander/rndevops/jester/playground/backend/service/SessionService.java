@@ -7,12 +7,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import dev.enchander.rndevops.jester.playground.backend.domain.extension.repository.SessionRepository;
+import dev.enchander.rndevops.jester.playground.backend.exception.UnauthorizedOperationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -78,7 +78,7 @@ class LocalSessionService implements SessionService {
 
         if (sessionRepository.isUserExists(sub) == false) {
             log.warn("ユーザーが存在しません。[{}]", sub);
-            throw new AuthorizationServiceException("認証されていません。");
+            throw new UnauthorizedOperationException("認証されていません。");
         }
 
         // この値は expireAt と同じ値にしておく。自前セッション管理で有効な間はHTTP sessionも有効。
@@ -141,7 +141,7 @@ class LocalSessionService implements SessionService {
 @Service
 @Profile("aws")
 @Slf4j
-class AwsLocalSessionService implements SessionService {
+class AwsSessionService implements SessionService {
 
     @Autowired
     private HttpServletRequest request;
@@ -166,7 +166,7 @@ class AwsLocalSessionService implements SessionService {
 
         if (sessionRepository.isUserExists(sub) == false) {
             log.warn("ユーザーが存在しません。[{}]", sub);
-            throw new AuthorizationServiceException("認証されていません。");
+            throw new UnauthorizedOperationException("認証されていません。");
         }
 
         // この値は expireAt と同じ値にしておく。自前セッション管理で有効な間はHTTP sessionも有効。

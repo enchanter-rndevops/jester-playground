@@ -27,23 +27,16 @@ backend, Lambdaはこれを依存関係で追加する。
       connectionURL="${jdbcUrl}"
       userId="${jdbcUsername}"
       password="${jdbcPassword}" />
-    <!--
-    <jdbcConnection
-      driverClass="com.mysql.cj.jdbc.Driver"
-      connectionURL="jdbc:mysql://localhost:3306/sandbox00?useSSL=false"
-      userId="sandbox"
-      password="sandbox" />
--->
 
     <!-- Entity（モデル）生成 -->
     <modelGenerator
-      targetPackage="com.unreliableforge.sandbox00.backend.domain.generated.entity"
+      targetPackage="dev.enchander.rndevops.jester.playground.backend.domain.extension.entity"
       targetProject="src/main/java" />
 
     <!-- Mapper（アノテーションベース）生成 -->
     <clientGenerator
       type="ANNOTATEDMAPPER"
-      targetPackage="com.unreliableforge.sandbox00.backend.domain.generated.mapper"
+      targetPackage="dev.enchander.rndevops.jester.playground.backend.domain.extension.mapper"
       targetProject="src/main/java" />
 
     <!-- 対象テーブル（必要に応じて追加） -->
@@ -51,7 +44,7 @@ backend, Lambdaはこれを依存関係で追加する。
     <!-- Flywayの管理テーブルも含まれてしまうので、あきらめるか、Flywayの管理テーブルを別スキーマに移動する。 -->
     <!-- 
     なぜかこれだとMySQLの管理テーブルも作成されてしまうので、正規表現で設定する必要があるらしい。
-    <table tableName="%" schema="sandbox00" />
+    <table tableName="%" schema="jester" />
     -->
     <table tableName="users" />
     <table tableName="sessions" />

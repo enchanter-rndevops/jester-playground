@@ -1,7 +1,7 @@
 {
   "name": "e2e",
   "version": "1.0.0",
-  "description": "SANDBOX00をローカルでE2Eテストを行う。 最終的にはAWS上で行うわけですが、ローカルでの環境を作成しておくことで、環境作成のための理解を深める。",
+  "description": "Jester PlaygroundをローカルでE2Eテストを行う。 最終的にはAWS上で行うわけですが、ローカルでの環境を作成しておくことで、環境作成のための理解を深める。",
   "main": "index.js",
   "scripts": {},
   "keywords": [],

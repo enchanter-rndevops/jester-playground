@@ -282,7 +282,7 @@ docker compose run --rm flyway <command> で実行可能。
 
 ```yaml
 # docker compose run --rm flyway <command>
-name: sandbox00
+name: jester-playground
 
 services:
   flyway:
@@ -290,19 +290,19 @@ services:
     image: flyway/flyway
     container_name: flyway_migration
     networks:
-      - sandbox00
+      - jester
     volumes:
       - ./src/main/resources/db:/flyway/sql
     environment:
-      - FLYWAY_URL=jdbc:mysql://db:3306/sandbox00?useSSL=false&allowPublicKeyRetrieval=true
+      - FLYWAY_URL=jdbc:mysql://db:3306/jester?useSSL=false&allowPublicKeyRetrieval=true
       - FLYWAY_USER=sandbox
       - FLYWAY_PASSWORD=sandbox
       - FLYWAY_LOCATIONS=filesystem:/flyway/sql/migrations,filesystem:/flyway/sql/repeatables
 
 networks:
-  sandbox00:
+  jester:
     external: true
-    name: sandbox00
+    name: jester
 ```
 
 参考までにflywayの実行結果（integer型を使用しているので警告が多数）

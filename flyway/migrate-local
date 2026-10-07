@@ -1,0 +1,4 @@
+FLYWAY_URL=jdbc:mysql://db:3306/jester?useSSL=false \
+FLYWAY_USER=jester \
+FLYWAY_PASSWORD=jester \
+docker compose run --rm flyway migrate

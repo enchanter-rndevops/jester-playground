@@ -28,13 +28,15 @@ STG環境までということで、BLUE, GREENデプロイまで行う予定は
   - Flyway
   - playwright(TypeScript)
   - AWS CloudFront
-  - AWS RDS
+  - AWS ALB
+  - AWS RDS MySQL
   - AWS S3
   - AWS ECR
   - AWS ECS
-  - AWS ALB
   - AWS ParameterStore
   - AWS SecretsManager
+  - EC2
+  - SSM
 
 ## 主要な検証・試行錯誤のポイント
 
@@ -92,29 +94,34 @@ STG環境までということで、BLUE, GREENデプロイまで行う予定は
 
 - AWSインフラ構成・認証方式の選定と設計
 - API設計方針・共通レスポンスフォーマット策定
-- Spring Boot ⇄ TypeScript 型自動生成スクリプトの検証
+- Spring Boot -> TypeScript 型自動生成スクリプトの検証
 
 ## やることリスト1
 
-- frontendをデプロイ(S3へコピー)。まずは手動で。
-- CloudFrontをセットアップ。frontendが見られるようにする。
-- backendはDBがないと起動しないので、RDSを作る、IAM認証で。
-- DB接続先を設定するための Parameter Storeを作る。
-- backendをデプロイ。これもまずは手動で。
-- ALBを作る。
-- CloudFront:HTTPS -> ALB:backend8080 へ。
-- ログインページを作る。まずは2ファクタ認証は行わない。
-- Cognitoを設定する。
+- 〇 frontendをデプロイ(S3へコピー)。まずは手動で。
+  * ビルドとデプロイを行うスクリプトを作成。
+- 〇 CloudFrontをセットアップ。frontendが見られるようにする。
+  * 最初のページが見られるようになりました。
+- 〇 backendはDBがないと起動しないので、RDSを作る、IAM認証を使用。
+- 〇 DB接続先を設定するための Parameter Storeを作る。
+  * 自動投入スクリプトから投入するようにした。
+- 〇 backendをデプロイ。これもまずは手動で。
+  * healthが動作するところまで。
+- 〇 ALBを作る。
+- 〇 CloudFront:HTTPS -> ALB:backend8080 へ。
+- 〇 ログインページを作る。まずは2ファクタ認証は行わない。
+  * まだ実装のみ。
+- 〇 Cognitoを設定する。ユーザーを作成し、DBに登録する（スクリプトを作成する）。
 - 認証が必要なサンプルAPIを作成する。認可はあとで。
-- AWS SSM ポートフォワードを使う(MySQL用)。
+- 〇 AWS SSM ポートフォワードを使う(MySQL用)。
+- コンソールから作成したものを CloudFormation で定義する（CDKは使わない）。
 
 ## やることリスト2
 
-- Flywayでマイグレーション。
+- 〇 Flywayでマイグレーション。
 - Dockerでvitest(local)
 - DockerでJUnitテスト(local)
 - DockerでE2Eテスト(local)
-- CloudFromationでVPC環境を作成する。
 - CodeBuild, CodeDeploy, CodePipeline
 - vitest を AWS で
 - JUnit を AWS で
@@ -122,6 +129,9 @@ STG環境までということで、BLUE, GREENデプロイまで行う予定は
 - テストレポートのの生成と公開(vitest)
 - テストレポートのの生成と公開(JUnit)
 - テストレポートのの生成と公開(E2E)
+  - テストレポートはS3に配置し、CloudFrontで見られるようにしたら便利かも。
+  - CloudFrontは設定がめんどくさいので、nginx+SSMポートフォワードでやることにする（ビルド時にs3 syncする）。
+- 適宜ドキュメントの整理
 
 ## AWSの構成
 
@@ -162,7 +172,29 @@ DynamoDB(セッション管理用。とりあえずMySQLで行うので、まだ
 簡単な構成図。
 この図ではRedis(セッション管理と認可情報), SQSとLambdaがあるか、今回は使用しない。
 
+**この図に以下のものを追加する。**
+* VPC Endpoint
+* AZ(c,d), public subnet, private sunet
+* SSM用EC2インスタンス
+* SecurtyGroup
+
 <img src="./zu1.drawio.svg">
+
+## AWSの設定
+
+あまり複雑なことをしたくないので。
+
+* それぞれのネットワークにはセキュリティグループはひとつだけ。
+* インバウンドのソースは必ずセキュリティグループを指定。IPアドレスの指定は行わない
+* アウトバウンドは 0.0.0.0/0 
+  * これが問題になるのは、このセキュリティグループのEC2インスタンス内に不正に侵入されたときのみ。そうなったら、セキュリティグループの設定でどうにかなるものではない。
+* カスタムポリシーは使わない。リソースの制限は厳密に行わない。
+
+* AZ2つ(c,d)。それぞれにパブリックサブネット。プライベートサブネットをひとつづつ。
+  * パブリックサブネットはデフォルトでいい。
+  * プライベートサブネットはIGWへのルートを削除し、必要なサービスのVPCエンドポイントを紐づける。
+
+
 
 ## ALBとCongintoで認証を行う。
 
@@ -383,7 +415,23 @@ WSL
 
 WSL2でUbuntuを使えるようにしましょう。
 
+WSLの設定。必要に応じてメモリ使用量に設定を追加しましょう。
+デフォルトでは実メモリの半分または8Gのどちらか少ない方になります。
+メモリに余裕がある（開発用PCとして標準的なサイズである32G以上メモリを搭載している）PCでは、増やすことを検討したほうがいいかもしれません。
+.wslconfig
+```
+[wsl2]
+networkingMode=mirrored
+dnsTunneling=true
+autoProxy=true
+```
+
+インストール。Ubuntuの最新版がインストールされます。
+お好みのディストロを使ってもいいと思います。
+```
 wsl --installl Ubuntu
+```
+
 
 ### localeの設定
 
@@ -421,7 +469,9 @@ sudo timedatectl set-timezone Asia/Tokyo
 
 ### 必要なアプリのインストール
 
-- Docker(Windows上にDockerDesktopをインストール)
+**Dockerをインストールしていますが、ためしにwslcを使ってみるのもいいかもしれません。**
+
+- Docker(Windows上にDockerDesktopをインストール. ライセンス条件に合わない場合、WSL上にインストールしましょう)。
 - npm, node
 
 ```
@@ -448,7 +498,7 @@ URLはリソースのロケーションを表すためにあるものだが、AP
 パスパラメータと?以降のパラメータは使用しない。パラメータはすべてリクエストボディのJSON形式で渡す。
 
 POSTではCDNのキャッシュがきかないらしい。
-APIなので、キャッシュがなくても問題ない。というか、キャッシュされないほうがいい。
+APIなので、キャッシュがなくても問題ない。というか、キャッシュされないほうがいい（CloudFrontで/apiはキャッシュなしの設定を行う）。
 
 戻り値もすべてJSON形式とする。
 
@@ -463,7 +513,7 @@ SpringBootでAPIを定義した場合、当然だけど、SpringBoot内ではそ
 その型情報をfrontend(TypeScript)で使うことができたらいいのでは？
 
 SpringBootのAPIから、自動的にOpenAPIの定義書を作成することができる。
-この方法だと、frontend側ではSpringBootで定義したAPIの型情報を使うことができない。
+この方法で生成されるのは、HTML形式なので、frontendのTypeScriptで使用することができない。
 OpenAPIの定義書では、型チェックが機能しないので、わかりにくいし、エラーの原因となりうる。
 JavaScriptを使っているならともかく、せっかくTypeScriptを使っているのだから、SpringBootのメソッドの型情報をTypeScriptで使えるようにしたい。また、その型情報は自動的に生成するようにしたい。
 
@@ -472,15 +522,13 @@ TSでのレスポンスの定義例。ジェネリクスで合成する。Java�
 ```
 
 export type ApiBaseResponse = {
-severity: "success" | "info" | "warning" | "error" | "invalidate";
+severity: "success" | "info" | "warning" | "error";
 message: string;
 invalid?: Record<string, string>; // JSON path → メッセージ
 };
-
 ```
 
 ```
-
 export type ApiResponse<T> = ApiBaseResponse & {
 data: T;
 };
@@ -525,7 +573,7 @@ output: any;
 
 ```
 
-さすがにControllerに @Mapping をつけないというのはやりすぎかもしれないが、自動的にパスマッピングを行うというはやりたい。
+さすがにControllerに @Mapping をつけないというのはやりすぎかもしれない。
 
 ## テスト
 

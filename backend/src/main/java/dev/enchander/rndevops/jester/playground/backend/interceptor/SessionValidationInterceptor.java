@@ -18,8 +18,10 @@ import dev.enchander.rndevops.jester.playground.backend.domain.extension.reposit
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 public class SessionValidationInterceptor implements HandlerInterceptor {
 
     @Autowired
@@ -52,6 +54,8 @@ public class SessionValidationInterceptor implements HandlerInterceptor {
         }
 
         UserSessionEntity entity = userSession.get();
+
+        log.debug("User Session Entity: {}", entity);
 
         // SecurityContext に認証情報をセット
         PreAuthenticatedAuthenticationToken authentication = new PreAuthenticatedAuthenticationToken(

@@ -13,9 +13,7 @@ services:
   # 本当にDockerファイルが必要ですか？composeでインストール->実行ができるなら、そのほうが非効率ですが、シンプルですよ。
   # composeでDockerファイルを指定する必要がありますか？Dockerfileでイメージをビルドし、imageでそのイメージを使用するほうがシンプルでいいと思いますよ。
   backend:
-    image: backend00-dev:latest
-    #コンテナ名は指定しない。
-    #container_name: backend
+    image: backend-dev:latest
     ports:
       - "8080:8080"
       - "5005:5005"
@@ -34,7 +32,7 @@ services:
       - jester
     healthcheck:
       test:
-          ["CMD", "curl", "localhost:8080"]
+          ["CMD", "curl", "localhost:8080/api/v1/health"]
       interval: 5s
       timeout: 5s
       retries: 10

@@ -7,12 +7,14 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:dev": "vite build && aws s3 sync dist/ s3://jester-playground-559054714248-ap-northeast-1-an/frontend/dev/ --delete --cache-control \"no-cache,no-store,must-revalidate\""
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-query": "^5.101.4",
+    "aws-amplify": "^6.22.1",
     "axios": "^1.19.0",
     "js-yaml": "^5.3.0",
     "react": "^19.2.7",
