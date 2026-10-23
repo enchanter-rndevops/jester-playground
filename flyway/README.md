@@ -119,7 +119,7 @@ pom.xmlにあるgroupIdを設定する。ここに書いてあるものはメン
 
 ```xml
 <dependency>
-  <groupId>dev.enchanter.rndevops.jester.playground</groupId>
+  <groupId>one.enchanter.rndevops.jester.playground</groupId>
   <artifactId>migration</artifactId>
   <version>0.0.1</version>
   <scope>test</scope>

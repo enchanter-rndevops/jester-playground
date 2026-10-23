@@ -1,7 +1,7 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>dev.enchanter.rndevops.jester.playground</groupId>
+  <groupId>one.enchanter.rndevops.jester.playground</groupId>
   <artifactId>migration</artifactId>
   <version>0.0.1</version>
 
@@ -13,12 +13,29 @@
   <build>
     <resources>
       <resource>
+        <directory>src/main/resources</directory>
+        <includes>
+          <include>**/*.sql</include>
+        </includes>
+      </resource>
+    </resources>
+    <!--
+    <resources>
+      <resource>
         <directory>db/migration</directory>
         <targetPath>db/migration</targetPath>
         <includes>
           <include>*.sql</include>
         </includes>
       </resource>
+      <resource>
+        <directory>db/repeatables</directory>
+        <targetPath>db/repeatables</targetPath>
+        <includes>
+          <include>*.sql</include>
+        </includes>
+      </resource>
     </resources>
+-->
   </build>
 </project>

@@ -67,7 +67,7 @@
   --accent-color-6: #2aa198; /* cyan    */
   --accent-color-7: #859900; /* green   */
 
-  /* 意味で定義した色(オプション) */
+  /* 意味で定義した色 */
   --primary-background-color: var(--background-tone-01);
   --secondary-background-color: var(--background-tone-02);
   --primary-foreground-color: var(--content-tone-3);

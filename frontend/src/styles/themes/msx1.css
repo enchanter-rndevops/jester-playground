@@ -51,35 +51,7 @@
   .textarea-severity-success::before {
     margin: 1em;
   }
-  /*
- * 色の変更だけならクラスの再定義は不要。
- */
-  /*
-  .textarea-severity-success {
-    background-color: var(--msx-light-green);
-    color: var(--msx-white);
-  }
 
-  .textarea-severity-info {
-    background-color: var(--msx-dark-blue);
-    color: var(--msx-white);
-  }
-
-  .textarea-severity-warning {
-    background-color: var(--msx-light-yellow);
-    color: var(--msx-white);
-  }
-
-  .textarea-severity-error {
-    background-color: var(--msx-medium-red);
-    color: var(--msx-white);
-  }
-
-  .textarea-severity-critical {
-    background-color: var(--msx-dark-red);
-    color: var(--msx-white);
-  }
-*/
   /* 
   ネイティブタグのデフォルトスタイルを直接変更する。
   UIテーマ割り当て(テーマカラーの上書き)の変更やvariantクラス定義の上書きで変更できる範囲であれば不要。

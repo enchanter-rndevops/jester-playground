@@ -1,0 +1,363 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: VPC (172.33.0.0/16), Public/Private Subnets (1c, 1d), and Essential VPC Endpoints.
+
+Parameters:
+  ProjectName
+    Type: String
+    Default: projcet-one
+    Description: ProjcetName
+
+  EnvironmentName:
+    Type: String
+    Default: stg
+    Description: Environment name used for tagging (e.g. stg, prod)
+
+Resources:
+  # ==========================================
+  # VPC
+  # ==========================================
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 172.33.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub 'vpc-${ProjectName}'
+        - Key: env
+          Value: !Ref EnvironmentName
+
+  # ==========================================
+  # Internet Gateway
+  # ==========================================
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub 'igw-${ProjectName}'
+        - Key: env
+          Value: !Ref EnvironmentName
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  # ==========================================
+  # Subnets (/24)
+  # ==========================================
+  # Public Subnet 1c
+  PublicSubnet1c:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 172.33.1.0/24
+      AvailabilityZone: ap-northeast-1c
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub 'subnet-1c-public-{$ProjectName}'
+        - Key: env
+          Value: !Ref EnvironmentName
+
+  # Public Subnet 1d
+  PublicSubnet1d:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 172.33.2.0/24
+      AvailabilityZone: ap-northeast-1d
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub 'subnet-1d-public-{$ProjectName}'
+        - Key: env
+          Value: !Ref EnvironmentName
+
+  # Private Subnet 1c (ECS / Endpoints)
+  PrivateSubnet1c:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 172.33.10.0/24
+      AvailabilityZone: ap-northeast-1c
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub 'subnet-1c-private-${ProjectName}'
+        - Key: env
+          Value: !Ref EnvironmentName
+
+  # Private Subnet 1d (ECS / Endpoints)
+  PrivateSubnet1d:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 172.33.11.0/24
+      AvailabilityZone: ap-northeast-1d
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub 'subnet-1d-private-${ProjectName}'
+        - Key: env
+          Value: !Ref EnvironmentName
+
+  # ==========================================
+  # Route Tables
+  # ==========================================
+  # Public Route Table
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub 'rtb-${ProjectName}'
+        - Key: env
+          Value: !Ref EnvironmentName
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnet1cRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1c
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnet1dRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1d
+      RouteTableId: !Ref PublicRouteTable
+
+  # Private Route Table (for Gateway Endpoint S3 & internal routing)
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-private-rtb'
+        - Key: env
+          Value: !Ref EnvironmentName
+
+  PrivateSubnet1cRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet1c
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnet1dRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet1d
+      RouteTableId: !Ref PrivateRouteTable
+
+  # ==========================================
+  # Security Group for Interface Endpoints
+  # ==========================================
+  EndpointSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub 'sg-vpc-endpoint-${ProjectName}'
+      GroupDescription: Security Group for VPC Interface Endpoints
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 172.33.0.0/16
+      Tags:
+        - Key: Name
+          Value: !Sub 'sg-vpc-endpoint-${ProjectName}'
+        - Key: env
+          Value: !Ref EnvironmentName
+
+  # ==========================================
+  # Security Group for SSM Bastion EC2
+  # ==========================================
+  BastionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub 'sg-ec2-bastion-${ProjecttName}'
+      GroupDescription: Security Group for SSM Bastion Instance
+      VpcId: !Ref VPC
+      # Inbound: No open ports required. All traffic goes through SSM Session Manager.
+      SecurityGroupEgress:
+        - IpProtocol: '-1'
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub 'sg-ec2-bastion-${ProjectName}'
+        - Key: env
+          Value: !Ref EnvironmentName
+
+  # ==========================================
+  # IAM Role for SSM Bastion
+  # ==========================================
+  BastionInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Tags:
+        - Key: Name
+          Value: !Sub 'role-ec2-bastion-${ProjectName}'
+        - Key: env
+          Value: !Ref EnvironmentName
+
+  BastionInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref BastionInstanceRole
+
+  # ==========================================
+  # SSM Bastion EC2 Instance (Amazon Linux 2023)
+  # ==========================================
+  BastionInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      SubnetId: !Ref PublicSubnet1c
+      InstanceType: !Ref InstanceType
+      # Amazon Linux 2023 AMI (x86_64 / arm64 architecture support - using t4g.nano as default ARM, or switch AMI/Type)
+      # Note: t4g uses ARM (Graviton), t3 uses x86. Using standard SSM parameter for latest AL23 ARM or generic.
+      # Here we use the Systems Manager Parameter Store public path for Amazon Linux 2023 ARM64 (for t4g).
+      ImageId: !Sub '${AWS::SSM::Parameter::DASH:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64}'
+      # If using x86_64 instance type (e.g. t3.micro), switch to:
+      # ImageId: !Sub '${AWS::SSM::Parameter::DASH:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64}'
+      InstanceInitiatedShutdownBehavior: stop
+      IamInstanceProfile: !Ref BastionInstanceProfile
+      SecurityGroupIds:
+        - !Ref BastionSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub 'ec2-bastion-${ProjcetName}'
+        - Key: env
+          Value: !Ref EnvironmentName
+
+  # ==========================================
+  # VPC Endpoints (Placed in Private Subnets)
+  # ==========================================
+  # 1. S3 (Gateway Type - associated with Private Route Table)
+  S3Endpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      ServiceName: com.amazonaws.ap-northeast-1.s3
+      VpcEndpointType: Gateway
+      RouteTableIds:
+        - !Ref PrivateRouteTable
+
+  # 2. ECR API (Interface Type)
+  EcrApiEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      ServiceName: com.amazonaws.ap-northeast-1.ecr.api
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref PrivateSubnet1c
+        - !Ref PrivateSubnet1d
+      SecurityGroupIds:
+        - !Ref EndpointSecurityGroup
+      PrivateDnsEnabled: true
+
+  # 3. ECR DKR (Interface Type)
+  EcrDkrEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      ServiceName: com.amazonaws.ap-northeast-1.ecr.dkr
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref PrivateSubnet1c
+        - !Ref PrivateSubnet1d
+      SecurityGroupIds:
+        - !Ref EndpointSecurityGroup
+      PrivateDnsEnabled: true
+
+  # 4. CloudWatch Logs (Interface Type)
+  LogsEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      ServiceName: com.amazonaws.ap-northeast-1.logs
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref PrivateSubnet1c
+        - !Ref PrivateSubnet1d
+      SecurityGroupIds:
+        - !Ref EndpointSecurityGroup
+      PrivateDnsEnabled: true
+
+  # 5. Secrets Manager (Interface Type)
+  SecretsManagerEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      ServiceName: com.amazonaws.ap-northeast-1.secretsmanager
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref PrivateSubnet1c
+        - !Ref PrivateSubnet1d
+      SecurityGroupIds:
+        - !Ref EndpointSecurityGroup
+      PrivateDnsEnabled: true
+
+  # 6. Systems Manager / SSM (Interface Type)
+  SsmEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      ServiceName: com.amazonaws.ap-northeast-1.ssm
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref PrivateSubnet1c
+        - !Ref PrivateSubnet1d
+      SecurityGroupIds:
+        - !Ref EndpointSecurityGroup
+      PrivateDnsEnabled: true
+
+Outputs:
+  VpcId:
+    Description: VPC ID
+    Value: !Ref VPC
+    Export:
+      Name: !Sub '${EnvironmentName}-VpcId'
+  PublicSubnet1cId:
+    Description: Public Subnet 1c ID
+    Value: !Ref PublicSubnet1c
+    Export:
+      Name: !Sub '${EnvironmentName}-PublicSubnet1cId'
+  PublicSubnet1dId:
+    Description: Public Subnet 1d ID
+    Value: !Ref PublicSubnet1d
+    Export:
+      Name: !Sub '${EnvironmentName}-PublicSubnet1dId'
+  PrivateSubnet1cId:
+    Description: Private Subnet 1c ID
+    Value: !Ref PrivateSubnet1c
+    Export:
+      Name: !Sub '${EnvironmentName}-PrivateSubnet1cId'
+  PrivateSubnet1dId:
+    Description: Private Subnet 1d ID
+    Value: !Ref PrivateSubnet1d
+    Export:
+      Name: !Sub '${EnvironmentName}-PrivateSubnet1dId'

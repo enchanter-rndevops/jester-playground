@@ -11,43 +11,47 @@ LambdaプロジェクトでもMyBatis Generatorを実行するのはめんどく
 backend, Lambdaはこれを依存関係で追加する。
 
 ローカルリポジトリでもいいけど、AWS CodeArtifactに配置して、backend, Lambdaはこれを依存関係で追加する。
-
 -->
 
 <generatorConfiguration>
 
   <!-- DynamicSql 用のランタイム -->
   <context id="MyBatis3DynamicSqlContext"
-    targetRuntime="MyBatis3Simple"
+    targetRuntime="MyBatis3DynamicSql"
     defaultModelType="flat">
 
-    <!-- DB 接続設定 -->
+    <plugin type="com.softwareloop.mybatis.generator.plugins.LombokPlugin">
+      <property name="allArgsConstructor" value="true" />
+    </plugin>
+
+    <!--
     <jdbcConnection
-      driverClass="${jdbcDriverClass}"
-      connectionURL="${jdbcUrl}"
-      userId="${jdbcUsername}"
-      password="${jdbcPassword}" />
+      driverClass="${jdbc.DriverClass}"
+      connectionURL="${jdbc.Url}"
+      userId="${jdbc.Username}"
+      password="${jdbc.Password}" />
+    -->
+    <jdbcConnection
+      driverClass="com.mysql.cj.jdbc.Driver"
+      connectionURL="jdbc:mysql://localhost:3306/jester"
+      userId="jester"
+      password="jester" />
 
     <!-- Entity（モデル）生成 -->
     <modelGenerator
-      targetPackage="dev.enchander.rndevops.jester.playground.backend.domain.extension.entity"
-      targetProject="src/main/java" />
-
-    <!-- Mapper（アノテーションベース）生成 -->
+      targetPackage="one.enchanter.rndevops.jester.playground.backend.domain.generated.entity"
+      targetProject="src/main/java">
+      <!-- <property name="constructorBased" value="true" /> -->
+      <!-- <property name="immutable" value="false" /> -->
+    </modelGenerator>
     <clientGenerator
       type="ANNOTATEDMAPPER"
-      targetPackage="dev.enchander.rndevops.jester.playground.backend.domain.extension.mapper"
+      targetPackage="one.enchanter.rndevops.jester.playground.backend.domain.generated.mapper"
       targetProject="src/main/java" />
 
-    <!-- 対象テーブル（必要に応じて追加） -->
-    <!-- いちいちここに追加するのはめんどくさいので、ワイルドカードで指定できるようにする。 -->
-    <!-- Flywayの管理テーブルも含まれてしまうので、あきらめるか、Flywayの管理テーブルを別スキーマに移動する。 -->
-    <!-- 
-    なぜかこれだとMySQLの管理テーブルも作成されてしまうので、正規表現で設定する必要があるらしい。
-    <table tableName="%" schema="jester" />
-    -->
-    <table tableName="users" />
-    <table tableName="sessions" />
+    <table tableName="users" domainObjectName="UsersEntity" mapperName="UsersMapper" />
+    <table tableName="sessions" domainObjectName="SessionsEntity" mapperName="SessionsMapper" />
+    <table tableName="items" domainObjectName="ItemsEntity" mapperName="ItemsMapper" />
 
   </context>
 </generatorConfiguration>
