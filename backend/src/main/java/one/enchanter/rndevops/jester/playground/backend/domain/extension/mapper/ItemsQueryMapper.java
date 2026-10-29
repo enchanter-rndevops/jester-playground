@@ -49,7 +49,7 @@ public interface ItemsQueryMapper {
                         users.name as user_name
                     from items
                     left outer join users on items.user_sub = users.sub
-                    ordeer by created_at asc
+                    order by created_at asc
                     """;
         }
     }

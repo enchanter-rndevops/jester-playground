@@ -21,12 +21,6 @@ public record ApiResponse<T>(
         T data,
         List<InvalidField> invalidFields) {
 
-    public record InvalidField(
-            String field,
-            String message,
-            Object rejectedValue) {
-    };
-
     public ApiResponse(Severity severity, String message) {
         this(severity, message, null, List.of());
     }

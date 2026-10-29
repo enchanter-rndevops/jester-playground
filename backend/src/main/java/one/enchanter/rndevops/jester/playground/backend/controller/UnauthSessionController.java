@@ -22,25 +22,21 @@ import lombok.extern.slf4j.Slf4j;
 import one.enchanter.rndevops.jester.playground.backend.constant.Severity;
 import one.enchanter.rndevops.jester.playground.backend.service.SessionService;
 
-record UnauthSessionRequestBody(
-        String idToken) {
-}
-
-@Profile({ "local", "test" })
+@Profile({ "local", "test", "default" })
 @RestController
 @RequestMapping("/api")
 @Slf4j
 public class UnauthSessionController {
 
-    @Autowired
+    @Autowired(required = false)
     private SessionService sessionService;
 
-    @Autowired
+    @Autowired(required = false)
     private LocalTokenVerifier tokenVerifier;
 
-    @PostMapping("/v1/session")
-    public ResponseEntity<?> unauthSession(HttpServletRequest request, HttpServletResponse response,
-            @RequestBody UnauthSessionRequestBody body) throws IOException {
+    @PostMapping("/v1/session/login")
+    public ApiResponse<Void> unauthSession(HttpServletRequest request, HttpServletResponse response,
+            @RequestBody SessionRequestBody body) throws IOException {
         String idToken = body.idToken();
 
         Map<?, ?> decoded = tokenVerifier.verify(idToken);
@@ -56,28 +52,7 @@ public class UnauthSessionController {
         String sessionId = sessionService.createSession(sub);
 
         log.debug("Session ID:" + sessionId);
-        var responseBody = new ApiResponse<Void>(Severity.SUCCESS, "OK");
-        return ResponseEntity.ok(responseBody);
+        return new ApiResponse<Void>(Severity.SUCCESS, "OK");
     }
 
-}
-
-@Component
-@Profile({ "local", "test" })
-class LocalTokenVerifier {
-
-    public Map<String, Object> verify(String idToken) {
-        try {
-            // 署名検証なしで JWT をパース
-            // SignedJWT jwt = SignedJWT.parse(idToken);
-            JWT jwt = JWTParser.parse(idToken);
-
-            if (jwt == null) {
-                throw new RuntimeException("Invalid local token");
-            }
-            return jwt.getJWTClaimsSet().getClaims();
-        } catch (Exception e) {
-            throw new RuntimeException("Invalid local token", e);
-        }
-    }
 }

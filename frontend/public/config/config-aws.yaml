@@ -1,2 +1,6 @@
 # このファイルは、デプロイ時に config.yaml に上書きします。
 env: dev
+apiBaseUrl: /api/vi/
+authority: https://cognito-idp.ap-northeast-1.amazonaws.com/ap-northeast-1_OgaYp5bZA
+userPoolId: ap-northeast-1_OgaYp5bZA
+userPoolClientId: 6d0hpf8q6tb3lmmcerberi3969

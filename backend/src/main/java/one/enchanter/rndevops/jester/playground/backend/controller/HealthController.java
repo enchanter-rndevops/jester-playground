@@ -1,12 +1,11 @@
 package one.enchanter.rndevops.jester.playground.backend.controller;
 
-import java.util.Map;
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.extern.slf4j.Slf4j;
+import one.enchanter.rndevops.jester.playground.backend.constant.Severity;
 
 @RestController
 @Slf4j
@@ -14,11 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 public class HealthController {
 
     @GetMapping("/health")
-    public Map<String, String> health() {
+    public ApiResponse<Void> health() {
 
         log.info("/health");
 
-        return Map.of("status", "OK");
-
+        return new ApiResponse<Void>(Severity.SUCCESS, "Running.");
     }
 }

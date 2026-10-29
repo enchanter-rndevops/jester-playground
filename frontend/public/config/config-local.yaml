@@ -3,4 +3,8 @@
 # 開発環境のみで使う値はここに設定するのではなく、npm run dev で起動するときに環境変数を指定するようにしたほうがいいでしょう。
 # AWSの環境では、CloudFrontがホストするため、環境変数をつかうことができません。そのため、AWS上では起動時にこのファイルから読み込むようになっています。
 
-env: dev
+env: local
+apiBaseUrl: /api/vi/
+cognitoUrl: no-cognito
+userPoolId: no-user-poool-id
+userPoolClientId: no-client-id

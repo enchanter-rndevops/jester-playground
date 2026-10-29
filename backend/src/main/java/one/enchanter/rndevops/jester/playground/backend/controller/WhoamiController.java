@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import one.enchanter.rndevops.jester.playground.backend.constant.Severity;
 import one.enchanter.rndevops.jester.playground.backend.domain.generated.entity.UsersEntity;
+import one.enchanter.rndevops.jester.playground.backend.exception.NotFoundException;
 import one.enchanter.rndevops.jester.playground.backend.service.ProfileService;
 
 record WhoamiResponseData(
@@ -24,11 +25,11 @@ record WhoamiResponseData(
 @RequestMapping("/api")
 public class WhoamiController {
 
-    @Autowired
+    @Autowired(required = false)
     private ProfileService profileService;
 
     @PostMapping("/v1/whoami")
-    public ApiResponse<?> whoami(HttpServletRequest request) {
+    public ApiResponse<WhoamiResponseData> whoami(HttpServletRequest request) {
         // セッションからユーザー情報を取得（フィルターですでに認証済み・存在確認済みの前提）
         HttpSession session = request.getSession(false);
 
@@ -40,11 +41,13 @@ public class WhoamiController {
         UsersEntity profile = profileService.getProfile(sub);
 
         if (profile == null) {
-            return new ApiResponse<Void>(Severity.ERROR, "Profileが存在しません。");
+
+            // ここにログアウト処理を入れたほうがいいかもしれない。
+
+            throw new NotFoundException("ユーザーが存在しません。");
         }
-        var responseBody = new ApiResponse<WhoamiResponseData>(Severity.SUCCESS, "OK",
+        return new ApiResponse<WhoamiResponseData>(Severity.SUCCESS, "OK",
                 new WhoamiResponseData(profile.getSub(), profile.getEmail(), profile.getName()));
 
-        return responseBody;
     }
 }

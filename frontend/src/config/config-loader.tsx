@@ -3,8 +3,11 @@
 import { load } from "js-yaml";
 
 export type AppConfig = {
+  env: string;
   apiBaseUrl: string;
   cognitoUrl: string;
+  userPoolId: string;
+  userPoolClientId: string;
 };
 
 let cachedConfig: AppConfig | null = null;

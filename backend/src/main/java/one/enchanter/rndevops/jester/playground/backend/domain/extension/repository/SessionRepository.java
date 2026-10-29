@@ -1,6 +1,7 @@
 package one.enchanter.rndevops.jester.playground.backend.domain.extension.repository;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -46,7 +47,8 @@ public class SessionRepository {
 
     public boolean isUserExists(String sub) {
 
-        return !(usersMapper.selectByPrimaryKey(sub) == null);
+        Optional<?> result = usersMapper.selectByPrimaryKey(sub);
+        return result.isPresent();
 
     }
 

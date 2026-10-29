@@ -30,8 +30,8 @@ const api =
 Amplify.configure({
   Auth: {
     Cognito: {
-      userPoolId: "ap-northeast-1_OgaYp5bZA",
-      userPoolClientId: "6d0hpf8q6tb3lmmcerberi3969",
+      userPoolId: config.userPoolId,
+      userPoolClientId: config.userPoolClientId,
     },
   },
 });

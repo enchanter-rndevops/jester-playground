@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import one.enchanter.rndevops.jester.playground.backend.constant.Severity;
 import one.enchanter.rndevops.jester.playground.backend.domain.generated.entity.ItemsEntity;
+import one.enchanter.rndevops.jester.playground.backend.exception.NotFoundException;
 import one.enchanter.rndevops.jester.playground.backend.service.ItemService;
 
 /**
@@ -54,10 +55,10 @@ record ItemGetRequestBody(String id) {
 
 record ItemGetResponseData(
         Long id,
-        LocalDateTime timestamp,
-        String username,
         String name,
-        String description) {
+        String description,
+        LocalDateTime createdAt,
+        String username) {
 }
 
 /**
@@ -93,17 +94,17 @@ record ItemUpdateResponseData() {
 @RequestMapping("/api/v1/item")
 public class ItemController {
 
-    @Autowired
+    @Autowired(required = false)
     private ItemService itemService;
 
     @PostMapping("/list")
-    public ApiResponse<ItemListResponseData> list(HttpServletRequest request, @RequestBody ItemListRequestBody body) {
+    public ApiResponse<ItemListResponseData> list(HttpServletRequest request) {
         log.info("ItemController.list() called");
 
         var items = itemService.getItemList();
         var r = items.stream().map((e) -> {
-            return new ItemGetResponseData(e.getId(), e.getCreatedAt(), e.getUserName(), e.getName(),
-                    e.getDescription());
+            return new ItemGetResponseData(e.getId(), e.getName(), e.getDescription(), e.getCreatedAt(),
+                    e.getUserName());
         }).toList();
 
         return new ApiResponse<ItemListResponseData>(Severity.SUCCESS, "OK", new ItemListResponseData(r));
@@ -130,12 +131,18 @@ public class ItemController {
 
         var item = itemService.getItem(Long.parseLong(body.id()));
 
-        var responseData = new ItemGetResponseData(item.getId(), item.getCreatedAt(), item.getUserName(),
-                item.getName(),
-                item.getDescription());
-
-        return new ApiResponse<ItemGetResponseData>(Severity.SUCCESS, "OK", responseData);
-
+        if (item == null) {
+            throw new NotFoundException("アイテムが存在ません。");
+            // この例外をthrowすると、GlobalExceptionHandlerで以下のレスポンスと同じものを返すようになっています。
+            // こうすることで、以下のようなメリットがある。
+            // * Controllerでは（特別な要件がない場合）、戻り値に ResponseEntityを使わず、ApiResponse を直接使用することができる。
+            // * Controllerはokだけ。
+            // return new ApiResponse<ItemGetResponseData>(Severity.ERROR, "アイテムが存在しません。");
+        } else {
+            var responseData = new ItemGetResponseData(item.getId(), item.getName(), item.getDescription(),
+                    item.getCreatedAt(), item.getUserName());
+            return new ApiResponse<ItemGetResponseData>(Severity.SUCCESS, "OK", responseData);
+        }
     }
 
     @PostMapping("/delete")

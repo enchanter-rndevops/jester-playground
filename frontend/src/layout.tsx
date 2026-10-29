@@ -72,8 +72,11 @@ export function Layout() {
               <Button onClick={() => setDialogOpen(true)}>Sign in</Button>
             </div>
             <div className="basis-2/16">
-              <Button className="" onClick={() => applyTheme("default")}>
-                標準
+              <Button className="" onClick={() => applyTheme("light")}>
+                light
+              </Button>
+              <Button className="" onClick={() => applyTheme("dark")}>
+                dark
               </Button>
               <Button className="" onClick={() => applyTheme("MSX1")}>
                 MSX1
@@ -87,6 +90,7 @@ export function Layout() {
             {/* Left Menu */}
             <aside className="w-64 overflow-auto border-r border-gray-200 p-4">
               <div>左メニュー</div>
+              
               <div>
                 <Link to={"/"}>HOME</Link>
               </div>
