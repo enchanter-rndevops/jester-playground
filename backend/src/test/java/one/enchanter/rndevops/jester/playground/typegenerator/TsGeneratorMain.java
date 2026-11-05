@@ -11,13 +11,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,16 +24,47 @@ import org.springframework.web.bind.annotation.RestController;
 import one.enchanter.rndevops.jester.playground.backend.controller.ApiResponse;
 
 /**
- * TsGeneratorRunner
+ * ControllerからTs用の型定義を生成。
  * 
- * JavaのController(RestController)から、TypeScriptの型定義ファイルを作成する。
+ * mavenから実行する。
+ * $ ./mvnw exec:java@generate-ts
+ * 
+ * ネストしたDTOも再帰的に生成する。
+ * List<T> のジェネリクス対応。
+ * Map は any になる。
+ * 同じ名前のDTOが複数ある場合、最初に見つかったものを採用する。
  * 
  */
-@Component
-public class TsGeneratorRunner implements ApplicationRunner {
+//@formatter:off
+ /* 
+mavenから実行するため、pom.xml にこれを追加。
+<plugin>
+  <groupId>org.codehaus.mojo</groupId>
+  <artifactId>exec-maven-plugin</artifactId>
+  <version>3.1.0</version>
+  <executions>
+    <execution>
+      <id>generate-ts</id>
+        <goals>
+          <goal>java</goal>
+        </goals>
+    </execution>
+  </executions>
+  <configuration>
+    <mainClass>one.enchanter.rndevops.jester.playground.typegenerator.TsGeneratorMain</mainClass>
+	<classpathScope>test</classpathScope>
+  </configuration>
+</plugin>
+*/
+//@formatter:on
 
-    @Autowired
-    private ApplicationContext context;
+public class TsGeneratorMain {
+
+    public static void main(String[] args) throws Exception {
+        TsGeneratorMain generator = new TsGeneratorMain();
+        generator.run(
+                "one.enchanter.rndevops.jester.playground.backend.controller");
+    }
 
     public List<String> getRequestMappings(Class<?> clazz) {
         RequestMapping mapping = clazz.getAnnotation(RequestMapping.class);
@@ -68,9 +96,10 @@ public class TsGeneratorRunner implements ApplicationRunner {
         return List.of();
     }
 
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(String basePackage) throws Exception {
         StringBuilder ts = new StringBuilder();
+
+        TsInterfaceGenerator tsInterfaceGenerator = new TsInterfaceGenerator();
 
         ts.append("""
                 // API type generator for TypeScript.
@@ -81,13 +110,24 @@ public class TsGeneratorRunner implements ApplicationRunner {
         // ApiResponse（共通部分）の生成。
         ts.append(ApiResponseTsGenerator.generate());
 
-        // Controller の Bean を走査
-        Map<String, Object> controllers = context.getBeansWithAnnotation(RestController.class);
+        ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
+        scanner.addIncludeFilter(
+                new AnnotationTypeFilter(RestController.class));
+        List<?> controllers = scanner
+                .findCandidateComponents(basePackage)
+                .stream()
+                .map(BeanDefinition::getBeanClassName)
+                .map(className -> {
+                    try {
+                        return Class.forName(className);
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .toList();
 
-        for (Object controller : controllers.values()) {
-            Class<?> clazz = controller.getClass();
-
-            List<String> mappings = getRequestMappings(clazz);
+        for (Object c : controllers) {
+            Class<?> clazz = (Class<?>) c;
 
             for (Method method : clazz.getDeclaredMethods()) {
                 if (!method.isAnnotationPresent(PostMapping.class)
@@ -117,9 +157,8 @@ public class TsGeneratorRunner implements ApplicationRunner {
                 for (Parameter param : method.getParameters()) {
                     if (param.isAnnotationPresent(RequestBody.class)) {
                         Class<?> reqClass = param.getType();
-                        if (reqClass.isRecord()) {
-                            ts.append(TsInterfaceGenerator.generateTsInterface(reqClass));
-                        }
+                        System.out.println(reqClass.getSimpleName());
+                        ts.append(tsInterfaceGenerator.generate(reqClass));
                     }
                 }
 
@@ -130,18 +169,19 @@ public class TsGeneratorRunner implements ApplicationRunner {
                     Type genericReturn = method.getGenericReturnType();
                     if (genericReturn instanceof ParameterizedType pt) {
                         Type actualType = pt.getActualTypeArguments()[0];
-                        if (actualType instanceof Class<?> dataClass && dataClass.isRecord()) {
-                            ts.append(TsInterfaceGenerator.generateTsInterface(dataClass));
+                        if (actualType instanceof Class<?> dataClass) {
+                            ts.append(tsInterfaceGenerator.generate(dataClass));
                         }
                     }
                 }
             }
         }
 
-        // 出力先は変更できるようにする。
-        Path output = Paths.get("generated/api-types.ts");
+        // 出力先は設定で変更できるようにする。
+        Path output = Paths.get("./generated/api-types.ts");
         Files.writeString(output, ts.toString());
 
         System.out.println("TypeScript definitions generated: " + output.toAbsolutePath());
     }
+
 }
