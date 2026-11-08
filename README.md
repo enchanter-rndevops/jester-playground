@@ -1,5 +1,11 @@
 # Enchanter Research and DevOps.
 
+---
+
+- [ドキュメントポータル](./index.md)
+
+---
+
 このリポジトリは、特定のアーキテクチャや設計手法の検証・比較を行うための実験場です。
 「最初はこう実装したが、〇〇の理由から最終的に別のアプローチに変更した」といった、設計の試行錯誤のプロセスを記録しています。
 
@@ -37,12 +43,13 @@ STG環境までということで、BLUE, GREENデプロイまで行う予定は
   - AWS SecretsManager
   - EC2
   - SSM
+  - AWS CloudFormation
 
 ## 主要な検証・試行錯誤のポイント
 
 ### 1. フロントエンドの構成変更
 
-- **移行内容:** Next.js $\rightarrow$ 生React（+ Vite等のビルドツール想定）
+- **移行内容:** Next.js **→** 生React（+ Vite等のビルドツール想定）
 - **検証の意図・気づき:**
   - Mext.jsのSSR, SSGの挙動が複雑すぎたため、素のReactのライフサイクルや状態管理のプリミティブな挙動を再確認・検証するために移行。
   - nginx, CloudFront+S3のみで画面が動作するのて、テストが楽。
@@ -50,15 +57,15 @@ STG環境までということで、BLUE, GREENデプロイまで行う予定は
 
 ### 2. UIライブラリの選定
 
-- **移行内容:** MUI $\rightarrow$ Base UI
+- **移行内容:** MUI **→** Base UI
 - **検証の意図・気づき:**
-  - 豊富なコンポーネントが揃ったMUIから、ヘッドレス寄り（スタイルレス）なBase UIに切り替えることで、デザインの柔軟性やコンポーネントのカスタマイズ性をどこまで担保できるかを検証しました。
+  - 豊富なコンポーネントが揃ったMUIから、ヘッドレス寄り（スタイルレス）なBase UIに切り替えることで、エンジニアとデザイナーとの分業を試みる。
   - コンポーネントはDataGridがあればだいたい問題ないと思われる。
-  - CSSを自分で書かなければならないが、その分、テーマ切り替えなど、CSSのルール化を独自に行うことができ、デザイン変更に強くなる。
+  - CSSを自分で書かなければならないが、テーマ切り替えなど、CSSのルール化を独自に行うことができ、デザイン変更に強くなる。
 
 ### 3. 認証方式の設計変更
 
-- **移行内容:** AccessTokenベース $\rightarrow$ ID Token + 独自セッション管理
+- **移行内容:** AccessTokenベース **→** ID Token + 独自セッション管理
 - **検証の意図・気づき:**
   - トークンの有効期限やリフレッシュフロー、セキュリティ要件（Cookie/LocalStorageの扱いなど）を考慮し、自前でセッション管理を構築した場合の挙動とメリット・デメリットを検証。
   - クライアント側はCookicさえあればよい。リクエストヘッダなして呼べるため、実装が楽。
@@ -69,12 +76,13 @@ STG環境までということで、BLUE, GREENデプロイまで行う予定は
 
 ### 4. データベースアクセスと認証（予定）
 
-- **設計方針:** IAM認証の使用（予定）
+- **設計方針:** IAM認証の使用
 - **検証の意図・気づき:**
-  - 静的なパスワード管理を排除し、クラウド環境のIAM認証を挟むことで、インフラ寄りのセキュリティ担保や接続ハンドリングがどう変わるかを検証予定。
+  - 静的なパスワード管理を排除し、クラウド環境のIAM認証を挟むことで、パスワード管理の手間を軽減。
   - 一度トークンを取得する必要がある。AWS JDBCドライバを使うとそのあたりの処理が自動で行われるので、実装上は同じ。
   - パスワードをプロパティに書いてしまうという事故を防ぐことができる。
   - 前に参加していたプロジェクトでは、パスワードやトークンをプロパティファイルに書き、gitlabにアップロードしてしまっていた。ローカルに機密情報をテキストファイルなどで保存しないことを徹底する（共有フォルダにも保存しない）。
+  - DBeaverを使う場合は少々不便になる。
 
 ### 5. テスト・E2E環境の構築
 
@@ -99,20 +107,20 @@ STG環境までということで、BLUE, GREENデプロイまで行う予定は
 ## やることリスト1
 
 - 〇 frontendをデプロイ(S3へコピー)。まずは手動で。
-  * ビルドとデプロイを行うスクリプトを作成。
+  - ビルドとデプロイを行うスクリプトを作成。
 - 〇 CloudFrontをセットアップ。frontendが見られるようにする。
-  * 最初のページが見られるようになりました。
+  - 最初のページが見られるようになりました。
 - 〇 backendはDBがないと起動しないので、RDSを作る、IAM認証を使用。
 - 〇 DB接続先を設定するための Parameter Storeを作る。
-  * 自動投入スクリプトから投入するようにした。
+  - 自動投入スクリプトから投入するようにした。
 - 〇 backendをデプロイ。これもまずは手動で。
-  * healthが動作するところまで。
+  - healthが動作するところまで。
 - 〇 ALBを作る。
 - 〇 CloudFront:HTTPS -> ALB:backend8080 へ。
 - 〇 ログインページを作る。まずは2ファクタ認証は行わない。
-  * まだ実装のみ。
+  - まだ実装のみ。
 - 〇 Cognitoを設定する。ユーザーを作成し、DBに登録する（スクリプトを作成する）。
-- 認証が必要なサンプルAPIを作成する。認可はあとで。
+- 〇　認証が必要なサンプルAPIを作成する。認可はあとで。
 - 〇 AWS SSM ポートフォワードを使う(MySQL用)。
 - コンソールから作成したものを CloudFormation で定義する（CDKは使わない）。
 
@@ -138,43 +146,52 @@ STG環境までということで、BLUE, GREENデプロイまで行う予定は
 ## AWSの構成
 
 慣れないうちは、VPCの内外があいまいになりがち。どこが、あるいはどれがVPC内にあるのかをしっかりと理解しておこう。
-AWSのネットワークは、基本的に以下の3つの要素で構成されている。
+ネットワークは、基本的に以下の3つの要素で構成されている。
+
 それぞれの要素は、基本的にネットワーク的に分離されているため、接続するにはなんらかの方法で穴をあける必要がある（ここでは、セキュリティグループの説明は省略。すべての通信は許可されているものとする。実際に作成する上でも、セキュリティグループを作成しながらAWS上のリソースを作成しようとすると、手順が複雑になり、理解の範囲を超えるので、セキュリティグループの設定はすべてのリソースを作り終えてから最後に行う）。
 
-* インターネット(VPCの外側)
-* VPC
-  * パブリックサブネット(インターネットへ直接抜けるルート（IGW）を持つサブネット)
-  * プライベートサブネット(インターネットへ直接抜けるルート（IGW）を持たないサブネット)
-* AWS リージョンサービス(AWSが管理するマネージドサービス：S3、DynamoDB、SSM、Secrets Managerなど、VPCの外側にあるAWSのAPIエンドポイント群）)
+IPv4 の場合、パブリックサブネットであってもインターネットへアクセスするには NAT Gateway またはパブリック IPv4 アドレスが必要となる。
+IPv6 では各インスタンスにグローバルアドレスを割り当てられるため、アウトバウンド通信のためだけに NAT Gateway を用意する必要がない。
+
+IPv6 は CIDR や Security Group の設定に最初は戸惑うかもしれない。慣れてしまえば、IPv4 のアドレス枯渇を意識した設計や NAT 構成が不要になるため、むしろシンプルに感じられる。
+また CIDR についても、IPv4 のように利用可能アドレス数を意識して /20、/23 などの細かな設計を行う必要がほとんどない。アドレス空間に十分な余裕があるため、結果として構成を理解しやすくなる場合もある。
+
+IPv4 では、パブリックサブネットとプライベートサブネットの違いを理解するために、ルートテーブルだけでなく、グローバル IPv4 アドレスや NAT Gateway の有無も考慮する必要がある。
+一方 IPv6 では各インスタンスがグローバルアドレスを持つことが前提であり、NAT の概念が不要である。そのため、パブリックサブネットとプライベートサブネットの違いは、Internet Gateway（IGW）へのルートの有無として単純に考えられる。
+
+- インターネット(VPCの外側)
+- VPC
+  - パブリックサブネット(インターネットへ直接抜けるルート（IGW）を持つサブネット)
+  - プライベートサブネット(インターネットへ直接抜けるルート（IGW）を持たないサブネット)
+- AWS リージョンサービス(AWSが管理するマネージドサービス：S3、DynamoDB、SSM、Secrets Managerなど、VPCの外側にあるAWSのAPIエンドポイント群）)
 
 それぞれの要素からたの要素へ接続するには。
 
-* インターネット -> VPC パブリックサブネット
-  * パブリックサブネットにあるリソースがグローバルIPを持つ場合、そのままアクセス可能。
+- インターネット -> VPC パブリックサブネット
+  - パブリックサブネットにあるリソースがグローバルIPを持つ場合、そのままアクセス可能。
 
-* VPC パブリックサブネット -> インターネット
- * パブリックサブネットにあるリソースがグローバルIPを持つ場合、そのままアクセス可能。
- * グローバルIPを持たない場合、NAT Gatewayが必要。
+- VPC パブリックサブネット -> インターネット
+- パブリックサブネットにあるリソースがグローバルIPを持つ場合、そのままアクセス可能。
+- グローバルIPを持たない場合、NAT Gatewayが必要。
 
-* インターネット -> VPC プライベートサブネット
-  * インターネットからのアクセスはできない。
+- インターネット -> VPC プライベートサブネット
+  - インターネットからのアクセスはできない。
 
-* VPC プライベートサブネット -> インターネット
-  * インターネットへのアクセスはできない。
-  * ルートテーブルでNAT Gatewayへの関連付けがあれば、NAT Gatewayを通してアクセス可能。
+- VPC プライベートサブネット -> インターネット
+  - インターネットへのアクセスはできない。
+  - ルートテーブルでNAT Gatewayへのルート設定があれば、NAT Gatewayを通してアクセス可能。
 
-* VPC パブリックサブネット -> AWS リージョンサービス
-  * アクセス可能（インターネットを経由する）。
+- VPC パブリックサブネット -> AWS リージョンサービス
+  - アクセス可能（インターネットを経由するように見えるが、実際にはAWS内部ネットワークになるらしい）。
 
-* VPC プライベートサブネット -> AWS リージョンサービス
-  * サービスに対応した VPCエンドポイント（Gateway型 / Interface型） をルートテーブルやサブネットに設定することで、AWS内部ネットワーク経由でアクセス可能。S3, DynamoDBはGateway. それ以外はInterface形。
-
+- VPC プライベートサブネット -> AWS リージョンサービス
+  - サービスに対応した VPCエンドポイント（Gateway型 / Interface型） をルートテーブルやサブネットに設定することで、AWS内部ネットワーク経由でアクセス可能。S3, DynamoDBはGateway. それ以外はInterface形。
 
 VPC内のプライベートサブネットからAWSのマネージドサービスを使用する場合、VPCエンドポイントを作成する。
 利用するサービスがVPC内にある場合（EC2インスタンスやRDSなど）は、VPCエンドポイントは不要。
 プライベートサブネットからは、インターネット経由ではなく、AWSの内部ネットワーク（AWSクラウド内）を経由してサービスを利用する。
 
-インターネット上にアクセスする必要がある場合は、NATゲートウェイを作成する。
+インターネット上にアクセスする必要がある場合は、NATゲートウェイを作成する(IPv4の場合のみ)。
 NAT Gatewayを作成したら、ルートテーブルにNAT Gatewayへのルートを追加するだけ（IGWへのルートがあれば、削除すること）。
 パブリックサブネットにしてグローバルIPを割り当てる方法もあるが、セキュリティ面では「プライベートサブネット ＋ NATゲートウェイ」の構成にする方が望ましい。
 インターネット経由でAWS リージョンサービスを使用するのはおすすめしない。VPCエンドポイントを使用すること。
@@ -182,12 +199,12 @@ NAT Gatewayを作成したら、ルートテーブルにNAT Gatewayへのルー�
 基本的にパブリックサブネットとなるのはインターネット境界です。通常、インターネット境界ではビジネスロジックは行わないはずです。
 インターネット境界は、プライベートサブネットへのルートに徹するような構成にしましょう。
 
-
 ~~幸い、AWSにはインターネット境界となるサービス API GatewayやALBなどが多数用意されています。(ここに書くのと冗長なので、移動)~~
 
 ```
 [インターネット]
-      ↑ NAT
+      ↑ NAT(IPv4), Global IP(Public Subnet)
+    ↓  Global IP(Public Subnet)
 [ VPC ]
   ├─ Public Subnet
   └─ Private Subnet
@@ -196,7 +213,7 @@ NAT Gatewayを作成したら、ルートテーブルにNAT Gatewayへのルー�
   SQS / S3 / DynamoDB / Lambda / SNS / CloudWatch ...
 ```
 
-VPCでインターネット境界を持つというのはとても少ないので、パブリックサブネットなんて一度忘れてしまい、ALBやAPI Gatewayを構成する場合にちょっと思い出すくらいでいいです。
+VPCでインターネット境界を持つものはとても少ないので、パブリックサブネットなんて一度忘れてしまい、ALBやAPI Gatewayを構成する場合にちょっと思い出すくらいでいいです。
 VPC作成時にデフォルトで生成されるサブネットはパブリックサブネットだけなので、てきとうなプライベートサブネットを2つのAZで/24で作成してしまいましょう。
 /24にすることで、xxx.xxx.xxx.0/24 のように「キリが良くてわかりやすい」(IPアドレスの表記が10進数表記4つなので、最初の3つだけで区別することができる)、形になるため、初心者でも直感的に扱いやすいというメリットがあります。
 
@@ -204,6 +221,15 @@ Lambda を VPC 内で大量に起動したり、ECS のタスク数が多かっ�
 そういった場合は /22 や /20 のように広い CIDR を使う必要がありますが、最初の段階では、わかりやすさ優先で/24で問題ありません。
 
 IPアドレスの表現が16進数だったなら、/20でもわかりやすかったのにね。歴史的な経緯という、よくある（そして、修正しづらい）理由で分かりにくくなっているわけです。
+
+IPv4についての説明があり、わかりにくくなりました。IPv6であれば、ルートテーブルのみで管理できる。
+
+- IGWのルート(ここだけデュアルスタックのサブネット。IPV4アクセスの可能性あるリソースのみIPv4を割り当て)
+- Egress-only IGWのルート
+- 外部へのルートなし
+
+の３つだけ。IPv4であったNATがあって、ルートを通して、グローバルIPあったっけ？・・・とった複雑な設定が不要。
+ネットワークの構成がわかりやすくなるので、IPv6で作成することにする。
 
 リソースを作成する上での補足。
 AWSのリソースは、一度作成してしまうと、名前を変更できないものが多い。名前を変更するには、作り直すしか方法がない。
@@ -213,54 +239,20 @@ AWSのリソースは、一度作成してしまうと、名前を変更でき�
 というわけで、リソースの名前はあまり気にせず、リソース名の省略形(RDSやEC2など)-<UUIDの短縮形> でいいと思います（どうせ使わないので）。
 念のため、リソース名からタグ名を確認できるスクリプトなどがあると、作業がはかどるかもしれません。
 
-
-
-### ALBがCognitoの認証を行い、トークンの管理を行う場合の構成案。
-
-```
-CloudFront
-  + S3 (Reactで生成したページ。認可不要)
-  + ALB -> Cognito  (ALBは認証をここで行う)
-    + ECS　認可情報を参照し認可を行う。処理を行い、結果を返す。帳票などのファイルダウンロードは署名付きURLを返す。
-      + Lambda ECSからLambdaを直接実行する（ECSに負荷をかけたくない場合に使用する）。
-      + SQS
-        + Lambda(時間がかかる処理を非同期で行う)　
-
-MySQL
-DynamoDB
-```
-
-Cognitoの認証を行い、トークンの管理は自分で行う場合。
-
-```
-CloudFront
-  + S3 (Reactで生成したページ。認可不要)
-    + Conginto認証ページ
-      + AWS Conginto
-  + ALB
-    + ECS　
-      + 認証セッションの管理
-        + 認可情報を参照し認可を行う。処理を行い、結果を返す。帳票などのファイルダウンロードは署名付きURLを返す。
-        + Lambda ECSからLambdaを直接実行する（ECSに負荷をかけたくない場合に使用する）。
-        + SQS
-          + Lambda(時間がかかる処理を非同期で行う)　
-
-MySQL
-DynamoDB(セッション管理用。とりあえずMySQLで行うので、まだ使わない)
-```
+### 構成
 
 簡単な構成図。
 この図ではRedis(セッション管理と認可情報), SQSとLambdaがあるか、今回は使用しない。
 セキュリティグループは省略。以下の場所にセキュリティグループを設定する。
-アウトバウンドは0.0.0.0/0 
+アウトバウンドは0.0.0.0/0
 インバウンドは、アクセスされるもののセキュリティグループを指定する。適切なポート番号を指定すること。
 ALBはCloudFrontからのHTTPを許可すること。
 
-* ALB 
-* ECS
-* 踏み台EC2
-* VPC Endpoint
-* RDS
+- ALB
+- ECS
+- 踏み台EC2
+- VPC Endpoint
+- RDS
 
 <img src="./zu1.drawio.svg">
 
@@ -268,17 +260,15 @@ ALBはCloudFrontからのHTTPを許可すること。
 
 あまり複雑なことをしたくないので。
 
-* それぞれのネットワークにはセキュリティグループはひとつだけ。
-* インバウンドのソースは必ずセキュリティグループを指定。IPアドレスの指定は行わない
-* アウトバウンドは 0.0.0.0/0 
-  * これが問題になるのは、このセキュリティグループのEC2インスタンス内に不正に侵入されたときのみ。そうなったら、セキュリティグループの設定でどうにかなるものではない。
-* カスタムポリシーは使わない。リソースの制限は厳密に行わない。
+- それぞれのネットワークにはセキュリティグループはひとつだけ。
+- インバウンドのソースは必ずセキュリティグループを指定。IPアドレスの指定は行わない
+- アウトバウンドは 0.0.0.0/0
+  - これが問題になるのは、このセキュリティグループのEC2インスタンス内に不正に侵入されたときのみ。そうなったら、セキュリティグループの設定でどうにかなるものではない。
+- カスタムポリシーは使わない。リソースの制限は厳密に行わない。
 
-* AZ2つ(c,d)。それぞれにパブリックサブネット。プライベートサブネットをひとつづつ。
-  * パブリックサブネットはデフォルトでいい。
-  * プライベートサブネットはIGWへのルートを削除し、必要なサービスのVPCエンドポイントを紐づける。
-
-
+- AZ2つ(c,d)。それぞれにパブリックサブネット。プライベートサブネットをひとつづつ。
+  - パブリックサブネットはデフォルトでいい。
+  - プライベートサブネットはIGWへのルートを削除し、必要なサービスのVPCエンドポイントを紐づける。
 
 ## ALBとCongintoで認証を行う。
 
@@ -286,11 +276,11 @@ ALBはCloudFrontからのHTTPを許可すること。
 
 1. ログイン状態を無効化できない（サーバー側で制御できない）
    ALB 認証は JWT の有効期限までログイン状態が続くため、
-   バックエンド側から「ログアウト」や「セッション無効化」ができない。  
+   バックエンド側から「ログアウト」や「セッション無効化」ができない。
    認可変更の即時反映もできず、実務的な制御が困難。
 2. 独自ログイン画面を使えない（Hosted UI 強制）
    ALB 認証は Cognito Hosted UI にリダイレクトされるため、
-   自前のログイン画面を作れない。  
+   自前のログイン画面を作れない。
    SPA の UX やブランドデザインと根本的に合わない。
 3. ログイン後に遷移しないケースに対応できない（SPA特有の要件）
    React アプリでは、 ログイン後に URL を変えず、状態だけ変えるケースが多い。
@@ -328,6 +318,23 @@ Authorization リクエストヘッダは存在しない。
 
 ## 認証をCognitoで行う。セッション情報を独自管理。
 
+### Cognitoで認証を行い、IDTokenの検証を行う。
+
+```
+CloudFront
+  + S3 (Reactで生成したページ。認証不要)
+  + S3 Loginページ -> Cognito  (認証)
+    + ECS IDTokenの検証(/api/session/loginのみ)。HTTPセッション生成。
+    + EES 認可情報を参照し認可を行う。処理を行い、結果を返す。帳票などのファイルダウンロードは署名付きURLを返す。
+      + Lambda ECSからLambdaを直接実行する（ECSに負荷をかけたくない場合に使用する）。
+      + SQS
+        + Lambda(時間がかかる処理を非同期で行う)　
+
+MySQL
+DynamoDB(セッション管理用。とりあえずMySQLで行うので、まだ使わない)
+
+```
+
 認証はCognitoを使用する。セッション情報は独自管理。WAFでセッション情報の管理を行わない。
 ALB+Cognitoでの認証のデメリットをなくした方法。
 多少実装が増える。
@@ -347,62 +354,71 @@ MFAやパスキーには対応していない。
 受け取ったIDTokenはbackendを送信。
 
 ```
+
 import { TextField, Button } from "@base-ui/react";
 
 export function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+const [username, setUsername] = useState("");
+const [password, setPassword] = useState("");
 
-  const handleLogin = async () => {
-    const token = await login(username, password);
-    // token をバックエンドへ送って HttpOnly Cookie に保存
-  };
+const handleLogin = async () => {
+const token = await login(username, password);
+// token をバックエンドへ送って HttpOnly Cookie に保存
+};
 
-  return (
-    <div className="flex flex-col gap-4 p-6 max-w-sm mx-auto">
-      <TextField value={username} onChange={e => setUsername(e.target.value)} placeholder="Username" />
-      <TextField type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" />
-      <Button onClick={handleLogin}>ログイン</Button>
-    </div>
-  );
+return (
+<div className="flex flex-col gap-4 p-6 max-w-sm mx-auto">
+<TextField value={username} onChange={e => setUsername(e.target.value)} placeholder="Username" />
+<TextField type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" />
+<Button onClick={handleLogin}>ログイン</Button>
+</div>
+);
 }
+
 ```
 
 ```
+
 import { CognitoIdentityProviderClient, InitiateAuthCommand } from "@aws-sdk/client-cognito-identity-provider";
 
 const client = new CognitoIdentityProviderClient({ region: "ap-northeast-1" });
 
 async function login(username: string, password: string) {
-  const command = new InitiateAuthCommand({
-    AuthFlow: "USER_PASSWORD_AUTH",
-    ClientId: "<YOUR_APP_CLIENT_ID>",
-    AuthParameters: {
-      USERNAME: username,
-      PASSWORD: password,
-    },
-  });
+const command = new InitiateAuthCommand({
+AuthFlow: "USER_PASSWORD_AUTH",
+ClientId: "<YOUR_APP_CLIENT_ID>",
+AuthParameters: {
+USERNAME: username,
+PASSWORD: password,
+},
+});
 
-  const res = await client.send(command);
-  return res.AuthenticationResult?.IdToken;
+const res = await client.send(command);
+return res.AuthenticationResult?.IdToken;
 }
+
 ```
 
 受け取ったIDをサーバー側へ送る。
 
 ```
+
 await fetch("/api/session", {
-  method: "POST",
-  body: JSON.stringify({ idToken }),
-  headers: { "Content-Type": "application/json" },
+method: "POST",
+body: JSON.stringify({ idToken }),
+headers: { "Content-Type": "application/json" },
 });
+
 ```
 
 サーバー側は、受け取ったIDを検証する。
 JWTによる検証を行い、検証の成功でセッションIDを生成し、DBにsubとともに保存する（IDTokenではないことに注意）。
 このコードは iss, aud の検証を行っていないため、セキュリティ上の問題があります。
 
+このコードではCookieを使用しています。実際にはセッションIDのみで管理できるため、Cookieは使用しません（最新のコードはそのようになっています）。
+
 ```
+
 @RestController
 public class SessionController {
 
@@ -436,16 +452,19 @@ public class SessionController {
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(Map.of("username", username));
     }
+
 }
+
 ```
 
 iss, sudも検証するようにしたもの。AIが生成したものなので、これあ本当に正しいものかを調べること。
 
 ```
+
 public SessionController() {
-    String userPoolId = "<USER_POOL_ID>";
-    String clientId = "<APP_CLIENT_ID>"; // パラメータストア等から取得
-    String region = "ap-northeast-1";
+String userPoolId = "<USER_POOL_ID>";
+String clientId = "<APP_CLIENT_ID>"; // パラメータストア等から取得
+String region = "ap-northeast-1";
 
     String issuer = String.format("https://cognito-idp.%s.amazonaws.com/%s", region, userPoolId);
     String jwkSetUri = issuer + "/.well-known/jwks.json";
@@ -467,7 +486,9 @@ public SessionController() {
     jwtDecoder.setJwtValidator(combinedValidator);
 
     this.jwtDecoder = jwtDecoder;
+
 }
+
 ```
 
 APIは、CookieからセッションIDを取得する。取得できなければ未認証エラー。
@@ -476,23 +497,28 @@ DBにセッションIDが存在しない場合、未認証エラー。
 ### ローカル開発環境の構成。
 
 docker compose を使用する。
-認証（のトークン管理）方式を変更したため、~~nginxは backend へのリダイレクト時に ダミーの x-amzn-oidc-data を付与する~~は行わない。
 
 ```
+
 WSL
-  + nginx
-    + frontend(/ を host.docker.internal:5173へリダイレクト)
-    + backend(/api を backend:8080 へリダイレクト)
-  db
+
+- nginx
+  - frontend(/ を host.docker.internal:5173へリダイレクト)
+  - backend(/api を backend:8080 へリダイレクト)
+    db
+
 ```
 
 ローカル動作確認環境の構成
 
 ```
+
 WSL
-  + nginx(frontend/distをホスト)
-    + backend(/api を backend:8080 へリダイレクト)
-  db
+
+- nginx(frontend/distをホスト)
+  - backend(/api を backend:8080 へリダイレクト)
+    db
+
 ```
 
 ## WSL環境の設定
@@ -503,6 +529,7 @@ WSLの設定。必要に応じてメモリ使用量に設定を追加しまし�
 デフォルトでは実メモリの半分または8Gのどちらか少ない方になります。
 メモリに余裕がある（開発用PCとして標準的なサイズである32G以上メモリを搭載している）PCでは、増やすことを検討したほうがいいかもしれません。
 .wslconfig
+
 ```
 [wsl2]
 networkingMode=mirrored
@@ -512,16 +539,18 @@ autoProxy=true
 
 インストール。Ubuntuの最新版がインストールされます。
 お好みのディストロを使ってもいいと思います。
+その場合、ここにあるコマンドがそのまま使えない可能性があります(実際、apt, dnf, yumとかめんどくさいよね)。
+
 ```
 wsl --installl Ubuntu
 ```
-
 
 ### localeの設定
 
 language packをインストール。localeを変更。
 
 ```
+
 sudo apt update
 sudo apt install language-pack-ja locales
 sudo update-locale LANG=ja_JP.UTF-8
@@ -542,23 +571,28 @@ LC_TELEPHONE="ja_JP.UTF-8"
 LC_MEASUREMENT="ja_JP.UTF-8"
 LC_IDENTIFICATION="ja_JP.UTF-8"
 LC_ALL=
+
 ```
 
 ついでにタイムゾーンも。
 いつのまにか Asia/Tokyoになっていたけど、一応確認しよう。
 
 ```
+
 sudo timedatectl set-timezone Asia/Tokyo
+
 ```
 
 ### 必要なアプリのインストール
 
 **Dockerをインストールしていますが、ためしにwslcを使ってみるのもいいかもしれません。**
+**wslcにはComposeがないので、wslcを使うのはちょっと厳しいか。**
 
 - Docker(Windows上にDockerDesktopをインストール. ライセンス条件に合わない場合、WSL上にインストールしましょう)。
 - npm, node
 
 ```
+
 $ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.6/install.sh | bash
 $ export NVM_DIR="$HOME/.nvm"
 $ [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
@@ -566,6 +600,7 @@ $ nvm --version
 $ nvm install --lts
 $ node --version
 $ npm --version
+
 ```
 
 - Visual Studio Code(Windowにインストール)
@@ -579,7 +614,9 @@ URLはリソースのロケーションを表すためにあるものだが、AP
 そのため、URLはローケーションではなく、実行するAPIのクラス名、メソッド名といったイメージになる。
 そのような形でHTTPを使用した場合、HTTPのルールを厳密に守る必要はなくなる。リソースの位置を表すものを、むりやりAPIとしているため、HTTPのルールを厳密に守ると無理がでできて、無駄に複雑になる。
 
-パスパラメータと?以降のパラメータは使用しない。パラメータはすべてリクエストボディのJSON形式で渡す。
+パスはリソースではなく関数名として扱うため、パスパラメータは使用しない。
+URLパラメータ(?以降のパラメータ)は使用しない。
+パラメータはすべてリクエストボディのJSON形式で渡す。
 
 POSTではCDNのキャッシュがきかないらしい。
 APIなので、キャッシュがなくても問題ない。というか、キャッシュされないほうがいい（CloudFrontで/apiはキャッシュなしの設定を行う）。
@@ -596,68 +633,15 @@ SOAP?あんなものは忘れてしまいましょう。
 SpringBootでAPIを定義した場合、当然だけど、SpringBoot内ではその型定義を使用することができる。
 その型情報をfrontend(TypeScript)で使うことができたらいいのでは？
 
-SpringBootのAPIから、自動的にOpenAPIの定義書を作成することができる。
-この方法で生成されるのは、HTML形式なので、frontendのTypeScriptで使用することができない。
-OpenAPIの定義書では、型チェックが機能しないので、わかりにくいし、エラーの原因となりうる。
-JavaScriptを使っているならともかく、せっかくTypeScriptを使っているのだから、SpringBootのメソッドの型情報をTypeScriptで使えるようにしたい。また、その型情報は自動的に生成するようにしたい。
+というわけで、SpringBootのAPI(Controller)から、自動的にOpenAPIの定義書を作成するスクリプトを作成しました。
+詳しくは、one.enchanter.rndevops.jester.playground.typegenerator.TsGeneratorMain.java を参照。
 
-TSでのレスポンスの定義例。ジェネリクスで合成する。Javaでもだいたい同じ。
-
-```
-
-export type ApiBaseResponse = {
-severity: "success" | "info" | "warning" | "error";
-message: string;
-invalid?: Record<string, string>; // JSON path → メッセージ
-};
-```
-
-```
-export type ApiResponse<T> = ApiBaseResponse & {
-data: T;
-};
-
-```
-
-### こんな感じでできたらいいな
-
-構想なので、具体的な方法はこれから。
-やりたいことは、大まかにいうとこんな感じ。
-
-1. @Mappingを使わずに、Controllerから@Mappingを自動生成。
-2. Controllerのパラメータ、戻り値のBeanからTypeScript側で使用する型定義を自動的に生成。
-
-APIは SpringBootの controller/** 以下に、 *Controller というクラス名で作成する。
-*Controllerのクラスには @RequestMapping("/api") をつけない。
-*Controllerクラスにあるメソッドには @GetMapping("/api/v1")　のようなマッピング定義を行わない。
-パッケージ名とクラス名から自動的に適切なパスとなるように設定する（アノテーションをつけたほうが楽かもしれないが、パスはクラス名/メソッド名という扱いなので、決まったルールで機械的につけてしまいたい）。
-
-パラメータの型をBeanで定義する。@NonNullなどを使用する。戻り値の型も同様。
-このBeanクラスから、frontendで使用するAPI型定義ファイルを自動生成する。
-
-自動生成した型定義はこんな感じ。
-
-```
-
-export type ApiMap = {
-// APIのパス。Controllerからいい感じに自動生成する。
-"v1/hello": {
-// v1/hello のパラメータと戻り値の型を定義し、それを指定する。
-// この型定義は、メソッドのパラメータと戻り値の型から自動的に生成する。
-// ? とか | null もあるので、全自動とはならないかもしれない。
-// Bean定義に
+パラメータにあるバリデーションのアノテーションは無視します。
 // @NotNull → TS では string
 // @Nullable → TS では string | null
 // Optional<T> → TS では T | null
-//とすることである程度自動化できる。TS側はnullは使用せずにundefinedで統一。
-input: any | undefined; // まだAPIがないので、anyとしている。実際にはanyは使用しない。
-output: any;
-};
-};
-
-```
-
-さすがにControllerに @Mapping をつけないというのはやりすぎかもしれない。
+のようには生成されません。
+いまのところ、 stringのみで作成されるため、すべての項目が必須となります。
 
 ## テスト
 
@@ -711,6 +695,10 @@ Docker composeで一発実行。ただし、frontendは事前のビルドが必�
 
 CodeBuildでも同じことを行う。
 Dockerでできているので、CodeBuild上でやるのも難しくないでしょう。
+
+```
+
+```
 
 ```
 

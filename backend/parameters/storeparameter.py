@@ -6,7 +6,7 @@ import sys
 # 設定
 # ================================
 # ENV は CodeBuild の環境変数から取得（dev / stg / prod）
-ENV = os.environ.get("ENV")
+ENV = os.environ.get("BACKEND_ENV")
 if not ENV:
     print("ERROR: ENV が指定されていません（dev / stg / prod）")
     sys.exit(1)
