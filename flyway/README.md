@@ -4,7 +4,7 @@
 
 プロジェクト立ち上げ時に、マイグレーションが必要じゃね？という話がありました。
 開始時から行わなくても、ある程度開発が進んだところからマイグレーションを導入してもいいじゃん。どうせ頻繁に更新されるんだし、そのたびにマイグレーションするの？
-と思いましたが、それほどこだわりもないし、長いものには巻かれてろ。ということで、開発初期からマイグレーションを導入することとなりました。
+と思いましたが、それほどこだわりもないし、開発初期からマイグレーションを導入することとなりました。
 
 マイグレーションは、MySQL Workbenchを使用していました。
 MySQL Workbench では、2つのDBを比較し、差分のSQLを出力する機能があります。
@@ -12,16 +12,16 @@ MySQL Workbench では、2つのDBを比較し、差分のSQLを出力する機�
 
 しかし、そんなうまい話があるわけはなく。
 
-- 正しいSQLを生成しない（そのまま実行するとエラーが出るので、手動で生成されたSQLを修正）。
-- 実際のDBとの間でしか比較できない（定義書から一度DBを作成し、それと比較）。
-- 差分作成から適用までの手順が非常に複雑。
-- マイグレーション担当者（自分のことです）の負担となる。
+- MySQL Workbenchのマイグレーションは正しいSQLを生成しない（そのまま実行すると、エラーが出る）。
+- 実際のDBとの間でしか比較できない。定義書→DDL→DB作成->マイグレーションという手順となる。
+- マイグレーションの手順をスクリプト化できない。
+- マイグレーション担当者の負担となる。
 
 というわけで、MySQL Workbenchを使うのはあきらめて、手動で差分を作成するといったシンプルな手順でマイグレーションができるFlywayを採用。
 
 DBのマイグレーションがないと、UTを行うときにDBを作ることができません。
 リリース時にDBに反映させるのにも必要。
-そもそもどの状態が最新かがわからなかったので（実装の担当者に聞いたが、はっきりした答えがない）、この機会に、マイグレーションを行った結果、作成されたDBを最新とすることにします。
+そもそもどの状態が最新かがわからなかったという問題もありましたので、すぐに必要になるわけではありませんが、いまのうちにしっかりとしたマイグレーション手順を整理しておくことにしました。
 
 ## Flyway とは
 
@@ -29,7 +29,7 @@ DBのマイグレーションツール。
 
 Flywayの公式ドキュメント https://documentation.red-gate.com/flyway/reference/usage/flyway-open-source
 
-最初の状態（ここでは、既存のSTG環境のDB）があり、その差分を積み重ねていく方式。
+最初の状態（途中から導入する場合）があり、その差分を積み重ねていく方式。
 差分を積み上げていく方式であるため、最新のものはきれいな（ほぼCREATE TABLEで構成されている）DDLになりません。
 初回リリースのタイミングとかで B<数字>__init.sql とし、これをベースラインとするといった整理をしたほうがいいかもしれません。
 通常のリリースでは行う必要はありませんが、大きな変更がある場合、ベースラインを作成したほうがいいでしょう。
@@ -50,6 +50,7 @@ V2以降は、V1からの差分を記述します。たとえば、テーブル�
 
 ベースラインがあるときの挙動。
 このようなマイグレーションファイルがある場合。
+
 ```
 migration/
   V1_init.sql
@@ -65,17 +66,16 @@ migration/
 初回のマイグレーション。
 最大のベースライン B2__ を実行。その後、それより大きい V__ ファイルを実行する。
 
-* B2_init_release.sql
-* V6_abcd_modify.sql
+- B2_init_release.sql
+- V6_abcd_modify.sql
 
 V2まで行っていた場合。
 前回実行されていた V__ から実行する。 すでにマイグレーションが行われていた場合、ベースライン B__ は無視される。
 
-* V3_kantoka_modify.sql
-* V4_hoge_modify.sql
-* V5_fuga_modify.sql
-* V6_abcd_modify.sql
-
+- V3_kantoka_modify.sql
+- V4_hoge_modify.sql
+- V5_fuga_modify.sql
+- V6_abcd_modify.sql
 
 ## Flywayを使うための準備
 
@@ -106,7 +106,7 @@ V2まで行っていた場合。
 ```
 
 マイグレーションファイルをクラスパスで参照できるようにするため、mavenを使用します。
-実行時にマイグレーションファイルを使用することはありません。テストコードから自動的にマイグレーションを行うために使用します。
+実行時にマイグレーションファイルを使用することはありません。テストコードから自動的にマイグレーションを行うために使用します（マイグレーションはTestContainerで行います）。
 
 mvn install で ローカルリポジトリにインストール。プロジェクトのpom.xml に 依存関係を追加することで、クラスパス経由でマイグレーションファイルを参照することができます。
 
@@ -129,7 +129,7 @@ pom.xmlにあるgroupIdを設定する。ここに書いてあるものはメン
 
 ### DBのドキュメント
 
-DBの設計書はありません。必要であれば実際に作成したDBからMySQL Workbenchや A5:SQL などを使用し、作成すること（developまたはmainリリース時に作成し、マイグレーションを行ったファイルの日時をつけておくなどのルール決めをしておいたほうがいいかもしれません。テキストファイルであれば、履歴はgitで残せるため、ファイル名にDEV, STG(PROD)をファイル名に含めるだけで充分だと思います）。
+DBの設計書はありません。必要であれば実際に作成したDBからMySQL Workbenchや A5:SQL などを使用し、作成すること（developまたはmainリリース時に作成し、マイグレーションを行ったファイルの日時をつけておくなどのルール決めをしておく。テキストファイルであれば、履歴はgitで残せるため、ファイル名にDEV, STG(PROD)をファイル名に含めるだけで充分だと思います）。
 
 A5:SQL ではいい感じのテーブル定義書をHTMLで作成してくれます。テキストファイルだし、これでいいのでは？ ER図も出せますが、gitで管理しずらいし、あまり意味がないかも。
 
@@ -278,7 +278,6 @@ $ docker run --rm \
 ```
 
 実際に使用するときには、compose.yaml で行うといいと思います。
-docker compose run --rm flyway <command> で実行可能。
 
 ```yaml
 # docker compose run --rm flyway <command>
@@ -286,23 +285,47 @@ name: jester-playground
 
 services:
   flyway:
-    # 公式のものがWAS Punlic ECRにない。AWS privare ECR にアップロードし、それを使用するようにすること。
     image: flyway/flyway
     container_name: flyway_migration
     networks:
       - jester
     volumes:
       - ./src/main/resources/db:/flyway/sql
+      - ./truststore.jks:/flyway/truststore.jks
+      - ~/.aws:/root/.aws:ro
     environment:
-      - FLYWAY_URL=jdbc:mysql://db:3306/jester?useSSL=false&allowPublicKeyRetrieval=true
-      - FLYWAY_USER=sandbox
-      - FLYWAY_PASSWORD=sandbox
+      - FLYWAY_URL=${FLYWAY_URL}
+      - FLYWAY_USER=${FLYWAY_USER}
+      - FLYWAY_PASSWORD=${FLYWAY_PASSWORD}
       - FLYWAY_LOCATIONS=filesystem:/flyway/sql/migrations,filesystem:/flyway/sql/repeatables
 
 networks:
   jester:
     external: true
     name: jester
+```
+
+migrate-aws AWS上のRDSに対してマイグレーションを行うスクリプト。
+
+```bash
+FLYWAY_PASSWORD=$(aws rds generate-db-auth-token \
+  --hostname enchanter-rds.cx2c4awkaqk4.ap-northeast-1.rds.amazonaws.com \
+  --port 3306 \
+  --region ap-northeast-1 \
+  --username jester_iam) \
+FLYWAY_URL="jdbc:mysql://host.docker.internal:13306/jester?useSSL=true&trustServerCertificate=true" \
+FLYWAY_USER=jester_iam \
+FLYWAY_PASSWORD=$FLYWAY_PASSWORD \
+docker compose run --rm flyway migrate
+```
+
+migrate-local ローカルにあるMySQLに対してマイグレーションを行うスクリプト。
+
+```bash
+FLYWAY_URL=jdbc:mysql://db:3306/jester \
+FLYWAY_USER=jester \
+FLYWAY_PASSWORD=jester \
+docker compose run --rm flyway migrate
 ```
 
 参考までにflywayの実行結果（integer型を使用しているので警告が多数）
@@ -328,30 +351,6 @@ WARNING: DB: Integer display width is deprecated and will be removed in a future
 Migrating schema `migration` to version "20260610174450 - create tcid"
 Successfully applied 4 migrations to schema `migration`, now at version v20260610174450 (execution time 00:00.667s)
 
-```
-
-### AWS RDS 上のMySQLに対してマイグレーションを行う場合のコマンド例。
-
-あらかじめ ssm ポートフォワードを行っておくこと。
-ポートフォワードを行った場合、DBの接続先は 127.0.0.1:<ポートフォワードのポート番号> となります（localhostではありません）。
-ヒストリーにパスワードを残さないため、 read -s -p を使っています。
-ローカルにパスワードを残さないのが原則であるため（ローカルファイルにパスワードをメモしておくのも推奨されません）、IAM認証にしておくことを推奨します、
-
-```bash
-$ read -s -p "Password: " DB_PASS
-$ FLYWAY_URL=jdbc:mysql://localhost:13306/<DB>?useSSL=false&allowPublicKeyRetrieval=true \
-  FLYWAY_USER=<USERNAME> \
-  FLYWAY_PASSWORD=${DB_PASS} \
-  FLYWAY_LOCATIONS=filesystem:/flyway/sql/migrations,filesystem:/flyway/sql/repeatables \
-  docker compose
-```
-
-STG環境で初回のマイグレーションの場合、Flywayの履歴がないので、V1 から実行しようとしてエラーになります。
-オプションでマイグレーションを開始するバージョン番号を指定すること。
-
-```
-FLYWAY_BASELINE_VERSION=<バージョン>
-FLYWAY_BASELINE_ON_MIGRATE=true
 ```
 
 ## 参考資料
@@ -425,4 +424,4 @@ $  docker compose run --rm flyway repair
 $  docker compose run --rm flyway migrate
 ```
 
-データを消してもいい場合、わざわざこんなことをせず、DROP DATABASEを行い、最初から実行したがほうがいいと思います。
+データを消してもいい場合、DROP DATABASEを行い、最初から実行したがほうがいいと思います。
