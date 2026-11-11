@@ -106,7 +106,8 @@ V2まで行っていた場合。
 ```
 
 マイグレーションファイルをクラスパスで参照できるようにするため、mavenを使用します。
-実行時にマイグレーションファイルを使用することはありません。テストコードから自動的にマイグレーションを行うために使用します（マイグレーションはTestContainerで行います）。
+他のプロジェクト(SpringBootなど)の実行時にマイグレーションファイルを使用することはありません。
+テストコードから自動的にマイグレーションを行うために使用します（マイグレーションはTestContainerで行います。このときにmavenの依存関係からマイグレーションファイルを取得し、マイグレーションを行います）。
 
 mvn install で ローカルリポジトリにインストール。プロジェクトのpom.xml に 依存関係を追加することで、クラスパス経由でマイグレーションファイルを参照することができます。
 
@@ -115,7 +116,8 @@ mvn install で ローカルリポジトリにインストール。プロジェ�
 クラスパス系経由でアクセスする場合、変更後に mvn install でローカルリポジトリにインストールする必要があります。依存関係にこれを追加すること。
 テスト時にも mvn install が行われていることも確認したほうがいいかも。
 
-pom.xmlにあるgroupIdを設定する。ここに書いてあるものはメンテナンスされていない可能性があるので、pom.xmlを参照して正しい値を設定しましょう。
+マイグレーションファイルを参照するプロジェクトのpom.xmlに依存関係を追加する。
+ここに書いてあるものはメンテナンスされていない可能性があるので、pom.xmlを参照して正しい値を設定しましょう。
 
 ```xml
 <dependency>
@@ -124,7 +126,23 @@ pom.xmlにあるgroupIdを設定する。ここに書いてあるものはメン
   <version>0.0.1</version>
   <scope>test</scope>
 </dependency>
+```
 
+Docker コンテナを使用する場合、compose.yml で **~/.m2** をマウントすること。
+
+```yaml
+backend:
+  image: backend-dev:latest
+  ports:
+    - "8080:8080"
+    - "5005:5005"
+  environment:
+    - AWS_REGION=ap-northeast-1
+    - SPRING_PROFILES_ACTIVE=local
+    - DB_HOST=db
+  volumes:
+    - ./:/app
+    - ~/.m2:/root/.m2 # コンテナからローカルの .m2をマウントし、ローカルリポジトリを参照する。
 ```
 
 ### DBのドキュメント
@@ -270,7 +288,7 @@ $ docker run --rm \
   --network pwt-net \               # MySQL Docker Container が動作しているネットワーク
   -v $(pwd):/flyway/sql \ # /migrate, repeatableディレクトリがあるディレクトリを/flyway/sqlマウント
   flyway/flyway \                   # flyway docker image
-  -url=jdbc:mysql://pwtdb:3306/P_warranty_migrate_test0?useSSL=false # マイグレーションを行うDB
+  -url=jdbc:mysql://db:3306/migrate_test0?useSSL=false # マイグレーションを行うJDBC URL
   -user=root \                      # マイグレーションを行うDBのユーザー名
   -password=root \                  # マイグレーションを行うDBのパスワード
   -locations=filesystem:/flyway/sql/migrations,filesystem:/flyway/sql/repeatables \ # マイグレーションファイルがある場所

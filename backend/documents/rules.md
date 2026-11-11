@@ -5,20 +5,23 @@
 AIに読み込ませる部分のみ別ファイルに分割すること。
 
 - AIが生成するもの
+  - Controllerなどの単純なEntity→dtoの詰め替え
+  - 人間が作成したクエリからMapper, Repositoryの生成
   - テストケース
   - Assert文
   - Mock設定
   - テストデータ生成
 
 - 人間が決めるもの
+  - API仕様
+  - ビジネス要件
+  - ビジネス要件との整合性
   - テスト対象
   - テスト観点
   - 境界値
   - 例外ケース
-  - ビジネス要件
   - テストケースの妥当性
   - テスト漏れ
-  - ビジネス要件との整合性
   - Assert内容
 
 AIが生成するテストは、Controller, Service, Repositoryのみ。listener, filterなどは対象外。

@@ -11,10 +11,32 @@ IAM認証を使用し、パスワードをローカルに保存しないよう�
 AWS JDBC Driverを使用し、IAM認証をドライバー側で行うようにするつもりでしたが、うまくいかなかったので、トークンを生成し、パスワードに設定する方式にしています。
 
 WSL上でAWS Cli v2, SSMポートフォーワードが使えるようになっていること。
-RDSのIAM認証の設定方法については、ここでは説明していません。
 
 RDSはMySQLを使用しています。
 ここでは、DBeaverの設定を行っています。パスワードを生成したトークンにするだけなので、ほかのツールでも接続することができると思います。
+
+## MySQLにIAMユーザー作成
+
+踏み台へ接続(adminはポートフォワードで接続できません)。
+
+```
+$ aws ssm start-session --target <踏み台EC2インスタンスのID>
+```
+
+踏み台からadminでMySQLへ接続。
+
+```
+$ mysql -h <RDSエンドポイント> -u admin -p
+```
+
+MySQLユーザー作成
+
+```
+> CREATE USER '<IAMユーザー>'@'%' IDENTIFIED WITH AWSAuthenticationPlugin AS 'RDS';
+> CREATE DATABASE <データベース名>
+> GRANT ALL PRIVILEGES ON <データベース名>.* TO '<IAMユーザー>'@'%';
+> FLUSH PRIVILEGES;
+```
 
 ## 準備
 
@@ -29,7 +51,7 @@ TOKEN=$(aws rds generate-db-auth-token \
 --hostname <RDSのエンドポイントURL> \
 --port <RDSのエンドポイントポート> \
 --region ap-northeast-1 \
---username <IAM認証を設定したRDSのユーザーID> \
+--username <IAM認証を設定したRDSのユーザー> \
 )
 echo "$TOKEN" | clip.exe
 echo "$TOKEN"
@@ -40,10 +62,10 @@ https://docs.aws.amazon.com/ja_jp/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.ht
 
 ## DBeaver
 
-Javaで作成されているので、わりと環境を選ばないツール。
+Javaで作成されているので、環境を選ばないツール。
 A5:SQL Mk-2よりもこちらのほうが操作しやすいように思う。
 
-wingetを使ってインストールするのがおすすめですが、アップデートをアプリから行うと、新規インストールになってしまうらしい。
+wingetを使ってインストールするのがおすすめですが、アップデートをアプリから行うと、wingetでインストールされたところと別なとろこに新規インストールされてしまう？
 
 ### 接続設定を作成する
 
