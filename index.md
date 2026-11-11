@@ -8,7 +8,7 @@
 - [Backend Controller Test Rules for AI](backend/documents/ai-rules-controller-test.md)
 - [Backend コーディングルール](backend/documents/rules.md)
 - [パラメータストアとシークレット](backend/parameters/README.md)
-- [AWSmemo.md](documents/AWSmemo.md)
+- [AWSの通信経路をVPC起点で整理してみた](documents/AWSmemo.md)
 - [AWS上のRDSにIAM認証で接続する](documents/RDSConnect.md)
 - [AWSでIPv6中心の構成を試してみた](documents/TryIPv6Now.md)
 - [Jester Playgorund E2Eテスト](e2e/README.md)
