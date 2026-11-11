@@ -10,6 +10,7 @@
 - [パラメータストアとシークレット](backend/parameters/README.md)
 - [AWSmemo.md](documents/AWSmemo.md)
 - [AWS上のRDSにIAM認証で接続する](documents/RDSConnect.md)
+- [AWSでIPv6中心の構成を試してみた](documents/TryIPv6Now.md)
 - [Jester Playgorund E2Eテスト](e2e/README.md)
 - [Flywayを使ってシンプルマイグレーション](flyway/README.md)
 - [React + TypeScript + Vite](frontend/README.md)
