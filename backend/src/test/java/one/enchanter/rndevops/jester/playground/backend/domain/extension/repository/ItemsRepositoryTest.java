@@ -59,6 +59,18 @@ public class ItemsRepositoryTest {
     @Autowired
     private ItemsRepository itemsRepository;
 
+    private ItemsEntity createItemsEntity(Long id, Long userId, String name, String description,
+            LocalDateTime createdAt, LocalDateTime updatedAt) {
+        ItemsEntity entity = new ItemsEntity();
+        entity.setId(id);
+        entity.setUserId(userId);
+        entity.setName(name);
+        entity.setDescription(description);
+        entity.setCreatedAt(createdAt);
+        entity.setUpdatedAt(updatedAt);
+        return entity;
+    }
+
     /*
      * testGetItem
      */
@@ -72,7 +84,7 @@ public class ItemsRepositoryTest {
         // テストデータの投入。
         // jdbcTemplateを使用してinsertを書くこともできるが、insertを書くのはとてもしんどい。
         // Mydatisにより自動生成されたコードはテストの必要がないので、これを使用してinsertを行う。
-        itemsMapper.insert(new ItemsEntity(1L, "sub", "name", "description",
+        itemsMapper.insert(createItemsEntity(1L, 1L, "name", "description",
                 LocalDateTime.of(2000, 1, 1, 1, 1),
                 LocalDateTime.of(2000, 1, 1, 1, 2)));
 
@@ -92,10 +104,10 @@ public class ItemsRepositoryTest {
     @DisplayName("正常系：IDを指定してアイテムのリストが正しく取得できること")
     void testGetItems_Success() {
 
-        itemsMapper.insert(new ItemsEntity(1L, "sub1", "name1", "description1",
+        itemsMapper.insert(createItemsEntity(1L, 1L, "name1", "description1",
                 LocalDateTime.of(2000, 1, 1, 1, 1),
                 LocalDateTime.of(2000, 1, 1, 1, 2)));
-        itemsMapper.insert(new ItemsEntity(2L, "sub2", "name2", "description2",
+        itemsMapper.insert(createItemsEntity(2L, 2L, "name2", "description2",
                 LocalDateTime.of(2001, 1, 1, 1, 1),
                 LocalDateTime.of(2001, 1, 1, 1, 2)));
 
@@ -118,7 +130,7 @@ public class ItemsRepositoryTest {
     @DisplayName("正常系：IDを指定してアイテムの削除が正しく行われること")
     void testDeleteItem_Success() {
 
-        itemsMapper.insert(new ItemsEntity(1L, "sub1", "name1", "description1",
+        itemsMapper.insert(createItemsEntity(1L, 1L, "name1", "description1",
                 LocalDateTime.of(2000, 1, 1, 1, 1),
                 LocalDateTime.of(2000, 1, 1, 1, 2)));
 
@@ -137,12 +149,12 @@ public class ItemsRepositoryTest {
     @DisplayName("正常系：IDを指定してアイテムの更新が正しく行われること")
     void testUpdateItem_Success() {
 
-        itemsMapper.insert(new ItemsEntity(1L, "sub1", "name1", "description1",
+        itemsMapper.insert(createItemsEntity(1L, 1L, "name1", "description1",
                 LocalDateTime.of(2000, 1, 1, 1, 1),
                 LocalDateTime.of(2000, 1, 1, 1, 2)));
 
         // Act (実行)
-        boolean result = itemsRepository.updateItem(1L, "name0", "description0");
+        boolean result = itemsRepository.updateItem(1L, "name0", "description0", 1L);
 
         Assertions.assertThat(result).isTrue();
 
@@ -164,7 +176,7 @@ public class ItemsRepositoryTest {
     @DisplayName("正常系：IDを指定してアイテムの登録が正しく行われること")
     void testRegisterItem_Success() {
 
-        ItemsEntity result = itemsRepository.registerItem("sub1", "name1", "description1");
+        ItemsEntity result = itemsRepository.registerItem(1L, "name1", "description1");
 
         log.debug(result.toString());
 

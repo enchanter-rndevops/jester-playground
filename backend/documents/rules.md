@@ -132,8 +132,6 @@ public class ItemControllerTest {
     @MockitoBean
     private UserSessionRepository userSessionRepository;
 
-    @MockitoBean
-    private SessionValidationInterceptor sessionValidationInterceptor;
 
     /**
      *
@@ -143,11 +141,6 @@ public class ItemControllerTest {
     @WithMockUser(username = "admin", roles = { "ADMIN" })
     @DisplayName("正常系：アイテム取得APIが正しく動作すること")
     void testItemGet() throws Exception {
-
-        when(sessionValidationInterceptor.preHandle(
-                ArgumentMatchers.any(),
-                ArgumentMatchers.any(),
-                ArgumentMatchers.any())).thenReturn(true);
 
          when(itemService.getItem(0))
                 .thenReturn(new ItemsUserEntity(0L, "itemname", "description",

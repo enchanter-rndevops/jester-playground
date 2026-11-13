@@ -2,6 +2,8 @@ package one.enchanter.rndevops.jester.playground.backend.controller;
 
 import java.util.List;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import one.enchanter.rndevops.jester.playground.backend.constant.Severity;
 
 /**
@@ -9,17 +11,20 @@ import one.enchanter.rndevops.jester.playground.backend.constant.Severity;
  * severityとmessageのみのレスポンスはこれを直接使用する。
  * 使用例。
  * new BaseResponse<Void>( Severity.OK, "OK");
- * 
+ *
  * @param severity
  * @param message
  * @param data
  * @param invalid
  */
-public record ApiResponse<T>(
-        Severity severity,
-        String message,
-        T data,
-        List<InvalidField> invalidFields) {
+@Getter
+@RequiredArgsConstructor
+public class ApiResponse<T> {
+
+    private final Severity severity;
+    private final String message;
+    private final T data;
+    private final List<InvalidField> invalidFields;
 
     public ApiResponse(Severity severity, String message) {
         this(severity, message, null, List.of());
@@ -29,8 +34,10 @@ public record ApiResponse<T>(
         this(severity, message, data, List.of());
     }
 
-    public ApiResponse(Severity severity, String message, List<InvalidField> invalidFields) {
+    public ApiResponse(
+            Severity severity,
+            String message,
+            List<InvalidField> invalidFields) {
         this(severity, message, null, invalidFields);
     }
-
 }

@@ -15,13 +15,19 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import one.enchanter.rndevops.jester.playground.backend.constant.Severity;
 import one.enchanter.rndevops.jester.playground.backend.service.SessionService;
 
-record SessionRequestBody(
-        String idToken) {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+class SessionRequestBody {
+    private String idToken;
 }
 
 @RestController
@@ -31,16 +37,16 @@ record SessionRequestBody(
 @RequiredArgsConstructor
 public class SessionController {
 
-    @Autowired(required = false)
+    @Autowired
     private SessionService sessionService;
 
-    @Autowired(required = false)
+    @Autowired
     private TokenVerifier tokenVerifier;
 
     @PostMapping("/v1/session/login")
     public ResponseEntity<ApiResponse<Void>> login(HttpServletRequest request, HttpServletResponse response,
             @RequestBody SessionRequestBody body) throws IOException {
-        String idToken = body.idToken();
+        String idToken = body.getIdToken();
 
         Map<?, ?> decoded = tokenVerifier.verify(idToken);
 
@@ -52,7 +58,7 @@ public class SessionController {
         String sub = String.valueOf(decoded.get("sub"));
 
         // セッション発行
-        String sessionId = sessionService.createSession(sub);
+        String sessionId = sessionService.createSession("cognito", sub);
 
         log.debug("Session ID:" + sessionId);
         return ResponseEntity.ok(new ApiResponse<Void>(Severity.SUCCESS, "OK"));

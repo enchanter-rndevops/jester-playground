@@ -2,52 +2,47 @@
 package one.enchanter.rndevops.jester.playground.backend.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import one.enchanter.rndevops.jester.playground.backend.UserPrincipal;
 import one.enchanter.rndevops.jester.playground.backend.constant.Severity;
 import one.enchanter.rndevops.jester.playground.backend.domain.generated.entity.UsersEntity;
 import one.enchanter.rndevops.jester.playground.backend.exception.NotFoundException;
 import one.enchanter.rndevops.jester.playground.backend.service.ProfileService;
 
-record WhoamiResponseData(
-        String sub,
-        String email,
-        String name) {
+@Getter
+@RequiredArgsConstructor
+class WhoamiResponseData {
+    private final String uid;
+    private final String email;
+    private final String name;
 }
 
 @RestController
 @RequestMapping("/api")
 public class WhoamiController {
 
-    @Autowired(required = false)
+    @Autowired
     private ProfileService profileService;
 
     @PostMapping("/v1/whoami")
-    public ApiResponse<WhoamiResponseData> whoami(HttpServletRequest request) {
-        // セッションからユーザー情報を取得（フィルターですでに認証済み・存在確認済みの前提）
-        HttpSession session = request.getSession(false);
+    public ApiResponse<WhoamiResponseData> whoami(@AuthenticationPrincipal UserPrincipal principal) {
 
-        var springSecurityContext = (SecurityContext) session
-                .getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
+        // ここでnullチェックを行わない。SecurityContextが存在しない場合、interceptorで未認証を返すため、ここでprincipalがnullになることはない。
+        Long userId = principal.getUserId();
 
-        String sub = springSecurityContext.getAuthentication().getPrincipal().toString();
-
-        UsersEntity profile = profileService.getProfile(sub);
+        UsersEntity profile = profileService.getProfile(userId);
 
         if (profile == null) {
-
-            // ここにログアウト処理を入れたほうがいいかもしれない。
-
             throw new NotFoundException("ユーザーが存在しません。");
         }
         return new ApiResponse<WhoamiResponseData>(Severity.SUCCESS, "OK",
-                new WhoamiResponseData(profile.getSub(), profile.getEmail(), profile.getName()));
+                new WhoamiResponseData(profile.getUid(), profile.getEmail(), profile.getName()));
 
     }
 }

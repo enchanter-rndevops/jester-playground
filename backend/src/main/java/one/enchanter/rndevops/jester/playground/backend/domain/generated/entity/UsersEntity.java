@@ -10,15 +10,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UsersEntity {
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-10-23T17:14:36.836403541+09:00", comments="Source field: users.sub")
-    private String sub;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-11-12T16:36:19.092832144+09:00", comments="Source field: users.id")
+    private Long id;
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-10-23T17:14:36.838756778+09:00", comments="Source field: users.email")
-    private String email;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-11-12T16:36:19.095105226+09:00", comments="Source field: users.uid")
+    private String uid;
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-10-23T17:14:36.838905678+09:00", comments="Source field: users.name")
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-11-12T16:36:19.095598811+09:00", comments="Source field: users.name")
     private String name;
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-10-23T17:14:36.839106991+09:00", comments="Source field: users.created_at")
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-11-12T16:36:19.095748132+09:00", comments="Source field: users.email")
+    private String email;
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-11-12T16:36:19.09600808+09:00", comments="Source field: users.created_at")
     private LocalDateTime createdAt;
 }

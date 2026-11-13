@@ -1,29 +1,29 @@
 # Backend Controller Test Rules for AI
 
-* テスト対象はバリデーションとレスポンスボディ。
-* ServiceはMock化する。ControllerテストはAPI仕様テストであり、Serviceの振る舞い検証は禁止。
-* @WebMvcTest を使用
-* DBアクセス禁止
-* MockMvcを利用
-* JSONPathですべての項目を検証。
-* 複数パターンがある場合や、nullなどの検証も行うこと。
-* Controllerテストでは業務ロジックを確認しない
-* @DisplayName でテストケースを記述してください。
-* テストケースは以下を検討すること
-  * 正常系
-  * 0件
-  * NULL
-  * 境界値
-* テストコードのみ出力すること
-*  importを含めて出力すること
-* 省略記法は使用しないこと
-* TODOコメントは出力しないこと
-* 全テストケースを実装すること
-* JSONPathですべてのレスポンス項目を検証すること
-* バリデーションエラーの場合、invalidFieldsの内容を検証すること。
-
+- テスト対象はバリデーションとレスポンスボディ。
+- ServiceはMock化する。ControllerテストはAPI仕様テストであり、Serviceの振る舞い検証は禁止。
+- @WebMvcTest を使用
+- DBアクセス禁止
+- MockMvcを利用
+- JSONPathですべての項目を検証。
+- 複数パターンがある場合や、nullなどの検証も行うこと。
+- Controllerテストでは業務ロジックを確認しない
+- @DisplayName でテストケースを記述してください。
+- テストケースは以下を検討すること
+  - 正常系
+  - 0件
+  - NULL
+  - 境界値
+- テストコードのみ出力すること
+- importを含めて出力すること
+- 省略記法は使用しないこと
+- TODOコメントは出力しないこと
+- 全テストケースを実装すること
+- JSONPathですべてのレスポンス項目を検証すること
+- バリデーションエラーの場合、invalidFieldsの内容を検証すること。
 
 テストコードのサンプル
+
 ```
 package one.enchanter.rndevops.jester.playground.backend.controller;
 
@@ -49,7 +49,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import one.enchanter.rndevops.jester.playground.backend.config.SecurityConfig;
 import one.enchanter.rndevops.jester.playground.backend.domain.extension.entity.ItemsUserEntity;
 import one.enchanter.rndevops.jester.playground.backend.domain.extension.repository.UserSessionRepository;
-import one.enchanter.rndevops.jester.playground.backend.interceptor.SessionValidationInterceptor;
 import one.enchanter.rndevops.jester.playground.backend.service.ItemService;
 
 @WebMvcTest(controllers = ItemController.class)
@@ -66,21 +65,13 @@ public class ItemControllerTest {
     @MockitoBean
     private UserSessionRepository userSessionRepository;
 
-    @MockitoBean
-    private SessionValidationInterceptor sessionValidationInterceptor;
-
     /**
-     * 
+     *
      */
     @Test
     @WithMockUser(username = "admin", roles = { "ADMIN" })
     @DisplayName("正常系：アイテム取得APIが正しく動作すること")
     void testItemGet() throws Exception {
-
-        when(sessionValidationInterceptor.preHandle(
-                ArgumentMatchers.any(),
-                ArgumentMatchers.any(),
-                ArgumentMatchers.any())).thenReturn(true);
 
          when(itemService.getItem(0))
                 .thenReturn(new ItemsUserEntity(0L, "itemname", "description",
@@ -131,7 +122,7 @@ import one.enchanter.rndevops.jester.playground.backend.exception.NotFoundExcept
 import one.enchanter.rndevops.jester.playground.backend.exception.UnauthorizedOperationException;
 
 /**
- * 
+ *
  * GlobalExceptionHandler
  */
 @RestControllerAdvice
@@ -246,7 +237,7 @@ import one.enchanter.rndevops.jester.playground.backend.constant.Severity;
  * severityとmessageのみのレスポンスはこれを直接使用する。
  * 使用例。
  * new BaseResponse<Void>( Severity.OK, "OK");
- * 
+ *
  * @param severity
  * @param message
  * @param data
@@ -277,9 +268,9 @@ public record ApiResponse<T>(
 package one.enchanter.rndevops.jester.playground.backend.controller;
 
 /**
- * 
+ *
  * InvalidField
- * 
+ *
  * @param field
  * @param message
  * @param rejectedValue

@@ -50,6 +50,8 @@ backend, Lambdaはこれを依存関係で追加する。
       targetProject="src/main/java" />
 
     <table tableName="users" domainObjectName="UsersEntity" mapperName="UsersMapper" />
+    <table tableName="user_identities" domainObjectName="UserIdentitiesEntity"
+      mapperName="UserIdentitiesMapper" />
     <table tableName="sessions" domainObjectName="SessionsEntity" mapperName="SessionsMapper" />
     <table tableName="items" domainObjectName="ItemsEntity" mapperName="ItemsMapper" />
 

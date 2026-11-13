@@ -22,22 +22,22 @@ import lombok.extern.slf4j.Slf4j;
 import one.enchanter.rndevops.jester.playground.backend.constant.Severity;
 import one.enchanter.rndevops.jester.playground.backend.service.SessionService;
 
-@Profile({ "local", "test", "default" })
+@Profile({ "local", "test" })
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 @Slf4j
 public class UnauthSessionController {
 
-    @Autowired(required = false)
+    @Autowired
     private SessionService sessionService;
 
-    @Autowired(required = false)
+    @Autowired
     private LocalTokenVerifier tokenVerifier;
 
-    @PostMapping("/v1/session/login")
+    @PostMapping("/session/login")
     public ApiResponse<Void> unauthSession(HttpServletRequest request, HttpServletResponse response,
             @RequestBody SessionRequestBody body) throws IOException {
-        String idToken = body.idToken();
+        String idToken = body.getIdToken();
 
         Map<?, ?> decoded = tokenVerifier.verify(idToken);
 
@@ -49,7 +49,7 @@ public class UnauthSessionController {
         String sub = String.valueOf(decoded.get("sub"));
 
         // セッション発行
-        String sessionId = sessionService.createSession(sub);
+        String sessionId = sessionService.createSession("cognito", sub);
 
         log.debug("Session ID:" + sessionId);
         return new ApiResponse<Void>(Severity.SUCCESS, "OK");

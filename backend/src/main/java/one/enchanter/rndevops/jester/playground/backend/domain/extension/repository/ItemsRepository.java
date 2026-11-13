@@ -67,13 +67,14 @@ public class ItemsRepository {
      * @param description 更新する値。nullでdescriptionを更新しない。
      * @return
      */
-    public boolean updateItem(long id, String name, String description) {
+    public boolean updateItem(long id, String name, String description, Long userId) {
 
         ItemsEntity row = new ItemsEntity();
 
         row.setId(id);
         row.setName(name);
-        row.setUserSub(description);
+        row.setUserId(userId);
+        row.setDescription(description);
 
         int result = itemsMapper.updateByPrimaryKeySelective(row);
 
@@ -89,11 +90,11 @@ public class ItemsRepository {
      * @return
      */
     @Transactional
-    public ItemsEntity registerItem(String sub, String name, String description) {
+    public ItemsEntity registerItem(Long userId, String name, String description) {
 
         ItemsEntity row = new ItemsEntity();
 
-        row.setUserSub(sub);
+        row.setUserId(userId);
         row.setName(name);
         row.setDescription(description);
 

@@ -1,13 +1,18 @@
 package one.enchanter.rndevops.jester.playground.backend.handler;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.client.HttpClientErrorException.NotFound;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
@@ -29,7 +34,11 @@ import one.enchanter.rndevops.jester.playground.backend.exception.UnauthorizedOp
 @Slf4j
 public class GlobalExceptionHandler {
 
-    // 1. @Valid によるバリデーションエラー
+    /**
+     * @Valid によるバリデーションエラー
+     * @param ex
+     * @return
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidationException(MethodArgumentNotValidException ex) {
 
@@ -49,13 +58,47 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<ApiResponse<Void>>(body, HttpStatus.BAD_REQUEST);
     }
 
-    // 2. 型不一致エラー
+    /*
+     * 型変換エラー時のタイプによるメッセージ変換Map
+     * 型が増えた場合、ここに追加すること。
+     */
+    private static final Map<Class<?>, String> TYPE_NAMES = Map.ofEntries(
+            Map.entry(byte.class, "整数"),
+            Map.entry(Byte.class, "整数"),
+            Map.entry(short.class, "整数"),
+            Map.entry(Short.class, "整数"),
+            Map.entry(int.class, "整数"),
+            Map.entry(Integer.class, "整数"),
+            Map.entry(long.class, "整数"),
+            Map.entry(Long.class, "整数"),
+            Map.entry(float.class, "小数"),
+            Map.entry(Float.class, "小数"),
+            Map.entry(double.class, "小数"),
+            Map.entry(Double.class, "小数"),
+            Map.entry(boolean.class, "真偽値(true/false)"),
+            Map.entry(Boolean.class, "真偽値(true/false)"),
+            Map.entry(String.class, "文字列"),
+            Map.entry(LocalDate.class, "日付(yyyy-MM-dd)"),
+            Map.entry(LocalDateTime.class, "日時(yyyy-MM-dd HH:mm:ss)"),
+            Map.entry(BigDecimal.class, "数値"),
+            Map.entry(UUID.class, "UUID"));
+
+    /**
+     * 型不一致エラー
+     * 
+     * @param ex
+     * @return
+     */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiResponse<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
 
+        Class<?> requiredType = ex.getRequiredType();
+
+        String t = TYPE_NAMES.getOrDefault(requiredType, "正しい値");
+
         InvalidField detail = new InvalidField(
                 ex.getName(),
-                String.format("'%s' は正しい型ではありません。", ex.getValue()),
+                String.format("%s を入力してください。", t),
                 ex.getValue());
 
         ApiResponse<Void> body = new ApiResponse<>(
@@ -66,15 +109,38 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<ApiResponse<Void>>(body, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * リクエストボディ形式エラー(JSONパースエラーなど)。
+     * 
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalMessageException(HttpMessageNotReadableException ex) {
+
+        ApiResponse<Void> body = new ApiResponse<>(
+                Severity.ERROR,
+                "リクエストボディの型が正しくありません。",
+                List.of());
+
+        return new ResponseEntity<ApiResponse<Void>>(body, HttpStatus.BAD_REQUEST);
+
+    }
+
+    /**
+     * Controllerが存在しない場合のエラー。
+     * メッセージは修正したほうがいいかもしれない。
+     * 
+     * @param ex
+     * @param req
+     * @return
+     */
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handle404(NoHandlerFoundException ex, HttpServletRequest req) {
 
         log.warn("404 Not Found: {}", req.getRequestURI());
 
-        String errorId = Utility.generateErrorId("W");
-
-        ApiResponse<Void> responseBody = new ApiResponse<>(Severity.ERROR,
-                ex.getMessage() + "（エラーID: " + errorId + "）");
+        ApiResponse<Void> responseBody = new ApiResponse<>(Severity.ERROR, ex.getMessage());
 
         return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
     }
@@ -84,33 +150,20 @@ public class GlobalExceptionHandler {
      * Controller側で404を返すのではなく、この例外を使用すること。ControllerからはOKのレスポンスのみ返すようにすること。
      * メッセージは例外生成時に設定したメッセージをそのまま使用します。
      * 
+     * 必要であれば、例外をthrowする側でエラーIDをメッセージに含めること。
+     * String errorId = Utility.generateErrorId("E");
+     * で簡単に生成できます。
+     * 
      * @param ex
      * @return
      */
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleNotFound(NotFound ex) {
+    public ResponseEntity<ApiResponse<Void>> handleNotFound(NotFoundException ex) {
 
         ApiResponse<Void> body = new ApiResponse<>(Severity.ERROR, ex.getMessage());
 
         return new ResponseEntity<ApiResponse<Void>>(body, HttpStatus.NOT_FOUND);
     }
-
-    // ResponseStatus例外ハンドラ。
-    // この例外は、SpringBootがthrowするものでなく、自分でthrowする。
-    // @ExceptionHandler(ResponseStatusException.class)
-    // public ResponseEntity<ApiResponse<Void>>
-    // handleResponseStatusException(ResponseStatusException ex,
-    // HttpServletRequest request) {
-    // String errorId = Utility.generateErrorId("E");
-
-    // log.warn("[{}] ステータス例外発生: {}", errorId, ex.getReason(), ex.getMessage());
-
-    // ApiResponse<Void> responseBody = new ApiResponse<>(Severity.ERROR,
-    // ex.getReason() + "（エラーID: " + errorId + "）");
-
-    // return new ResponseEntity<>(responseBody, ex.getStatusCode());
-
-    // }
 
     // Controllerからの未認証(401)のキャッチ。
     @ExceptionHandler(UnauthorizedOperationException.class)

@@ -19,19 +19,24 @@ public interface UserSessionMapper {
 
     class UserSessionRepositoryProvider implements ProviderMethodResolver {
 
-        public String getValidSession(String id, LocalDateTime now) {
+        public String getValidSession(@Param("id") String id, @Param("now") LocalDateTime now) {
 
             return """
                     select
-                        sessions.user_sub as sub,
-                        users.email as  email,
-                        users.name as user
-                        from sessions
-                    join users on users.sub = sessions.user_sub
+                        sessions.user_id as user_id,
+                        sessions.id as session_id,
+                        user_identities.provider as provider,
+                        user_identities.provided_user_id as provided_user_id,
+                        users.email as email,
+                        users.name as name
+                    from sessions
+                    join user_identities on user_identities.user_id = sessions.user_id
+                    join users on users.id = sessions.user_id
                     where
                         sessions.id = #{id}
                         and sessions.expires_at > #{now}
                     """;
         }
     }
+
 }

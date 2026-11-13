@@ -11,6 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+
 public class TsInterfaceGenerator {
 
     private final Set<Class<?>> generated = new LinkedHashSet<>();
@@ -61,8 +65,14 @@ public class TsInterfaceGenerator {
         if (clazz.isRecord()) {
             for (RecordComponent rc : clazz.getRecordComponents()) {
 
+                String propertyName = rc.getName();
+
+                if (!isRequired(rc)) {
+                    propertyName += "?";
+                }
+
                 System.out.println("record="
-                        + rc.getName()
+                        + propertyName
                         + " type="
                         + rc.getGenericType());
 
@@ -73,8 +83,14 @@ public class TsInterfaceGenerator {
 
             for (Field field : clazz.getDeclaredFields()) {
 
+                String propertyName = field.getName();
+
+                if (!isRequired(field)) {
+                    propertyName += "?";
+                }
+
                 System.out.println("field="
-                        + field.getName()
+                        + propertyName
                         + " type="
                         + field.getGenericType());
 
@@ -141,8 +157,13 @@ public class TsInterfaceGenerator {
 
             for (RecordComponent rc : clazz.getRecordComponents()) {
 
+                String propertyName = rc.getName();
+                if (!isRequired(rc)) {
+                    propertyName += "?";
+                }
+
                 sb.append("  ")
-                        .append(rc.getName())
+                        .append(propertyName)
                         .append(": ")
                         .append(mapType(
                                 rc.getGenericType()))
@@ -158,8 +179,13 @@ public class TsInterfaceGenerator {
                     continue;
                 }
 
+                String propertyName = field.getName();
+                if (!isRequired(field)) {
+                    propertyName += "?";
+                }
+
                 sb.append("  ")
-                        .append(field.getName())
+                        .append(propertyName)
                         .append(": ")
                         .append(mapType(
                                 field.getGenericType()))
@@ -245,4 +271,17 @@ public class TsInterfaceGenerator {
                 || clazz == LocalDateTime.class
                 || clazz == Void.class;
     }
+
+    private boolean isRequired(Field field) {
+        return field.isAnnotationPresent(NotNull.class)
+                || field.isAnnotationPresent(NotEmpty.class)
+                || field.isAnnotationPresent(NotBlank.class);
+    }
+
+    private boolean isRequired(RecordComponent field) {
+        return field.isAnnotationPresent(NotNull.class)
+                || field.isAnnotationPresent(NotEmpty.class)
+                || field.isAnnotationPresent(NotBlank.class);
+    }
+
 }

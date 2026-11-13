@@ -8,10 +8,8 @@ services:
 
   # imageは、AWS Private ECRにアップロードする予定。
   # 開発環境なので、localでも問題ない気がするが、ECRにアップロードしておくことで、imageとcontainerを明確に分けたかったり、imageをチームで共有したりとかできる。
-  # このあたりの区別があいまいのまま使っていたので、無駄なimage buildを行っていたといったことからの反省。
-  # composeファイルに使用するDockerファイルを書いてしまうのはよくない。
-  # 本当にDockerファイルが必要ですか？composeでインストール->実行ができるなら、そのほうが非効率ですが、シンプルですよ。
-  # composeでDockerファイルを指定する必要がありますか？Dockerfileでイメージをビルドし、imageでそのイメージを使用するほうがシンプルでいいと思いますよ。
+  # composeファイルにDockerfileの場所を書かないことで、イメージとコンテナを明確に分離して考える
+
   backend:
     image: backend-dev:latest
     ports:
@@ -31,8 +29,7 @@ services:
     networks:
       - jester
     healthcheck:
-      test:
-          ["CMD", "curl", "localhost:8080/api/v1/health"]
+      test: ["CMD", "curl", "localhost:8080/api/v1/health"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -49,8 +46,8 @@ services:
     networks:
       - jester
     depends_on:
-        backend:
-          condition: service_healthy
+      backend:
+        condition: service_healthy
 
   db:
     image: public.ecr.aws/docker/library/mysql:8.4

@@ -1,5 +1,5 @@
 // API type generator for TypeScript.
-// Generated at 2026-10-29T19:37:01.637944211
+// Generated at 2026-11-08T20:12:35.023064161
 
 export interface ApiResponse<T> {
   severity: Severity;
@@ -18,21 +18,45 @@ export type Severity = "SUCCESS" | "ERROR" | "WARN";
 
 // --------
 // one.enchanter.rndevops.jester.playground.backend.controller.HealthController
+// GET:/api/v1/test
+export interface TestRequest1 {
+  name?: string;
+  testRequest2?: TestRequest2;
+}
+
+export interface TestRequest2 {
+  name?: string;
+}
+
+export interface TestResponseData1 {
+  name?: string;
+  map?: any;
+  list?: string[];
+  testResponseData2?: TestResponseData2;
+}
+
+export interface TestResponseData2 {
+  name?: string;
+}
+
+
+// --------
+// one.enchanter.rndevops.jester.playground.backend.controller.HealthController
 // GET:/api/v1/health
 
 // --------
 // one.enchanter.rndevops.jester.playground.backend.controller.ItemController
 // POST:/api/v1/item/get
 export interface ItemGetRequestBody {
-  id: string;
+  id?: string;
 }
 
 export interface ItemGetResponseData {
-  id: number;
-  name: string;
-  description: string;
-  createdAt: string;
-  username: string;
+  id?: number;
+  name?: string;
+  description?: string;
+  createdAt?: string;
+  username?: string;
 }
 
 
@@ -40,7 +64,15 @@ export interface ItemGetResponseData {
 // one.enchanter.rndevops.jester.playground.backend.controller.ItemController
 // POST:/api/v1/item/list
 export interface ItemListResponseData {
-  items: any[];
+  items?: ItemGetResponseData[];
+}
+
+export interface ItemGetResponseData {
+  id?: number;
+  name?: string;
+  description?: string;
+  createdAt?: string;
+  username?: string;
 }
 
 
@@ -53,7 +85,7 @@ export interface ItemRegisterRequestBody {
 }
 
 export interface ItemRegisterResponseData {
-  id: number;
+  id?: number;
 }
 
 
@@ -69,7 +101,7 @@ export interface ItemDeleteRequestBody {
 // one.enchanter.rndevops.jester.playground.backend.controller.UnauthSessionController
 // POST:/api/v1/session/login
 export interface SessionRequestBody {
-  idToken: string;
+  idToken?: string;
 }
 
 
@@ -77,8 +109,8 @@ export interface SessionRequestBody {
 // one.enchanter.rndevops.jester.playground.backend.controller.WhoamiController
 // POST:/api/v1/whoami
 export interface WhoamiResponseData {
-  sub: string;
-  email: string;
-  name: string;
+  uid?: string;
+  email?: string;
+  name?: string;
 }
 

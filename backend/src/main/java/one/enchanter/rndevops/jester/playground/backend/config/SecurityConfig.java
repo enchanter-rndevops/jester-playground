@@ -6,26 +6,34 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import one.enchanter.rndevops.jester.playground.backend.Utility;
 import one.enchanter.rndevops.jester.playground.backend.constant.Severity;
 import one.enchanter.rndevops.jester.playground.backend.controller.ApiResponse;
+import one.enchanter.rndevops.jester.playground.backend.filter.SessionValidationFilter;
 import tools.jackson.databind.ObjectMapper;
 
+@RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
 @Slf4j
 public class SecurityConfig {
 
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    // @Autowired
+    // private final SessionValidationFilter sessionValidationFilter;
+
     /*
      *
      */
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
-        ObjectMapper mapper = new ObjectMapper();
+    public SecurityFilterChain filterChain(HttpSecurity http, SessionValidationFilter sessionValidationFilter)
+            throws Exception {
 
         http.csrf(csrf -> csrf.disable())
                 .formLogin(form -> form.disable())
@@ -33,11 +41,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
-                        // パスによる認可の設定。ここに書いてしまうと、再デプロイでないと反映されない。
                         .requestMatchers("/api/v1/health").permitAll()
-                        .requestMatchers("/api/v1/hello").permitAll() // 確認用。後で削除する。
-                        .requestMatchers("/api/v1/session").permitAll()
-                        .requestMatchers("/api/v1/test/session").permitAll() // ローカル動作確認用。ローカル時のみ有効。
+                        .requestMatchers("/api/v1/session/login").permitAll()
+                        .requestMatchers("/api/v1/cognito/login").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptions -> exceptions
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
@@ -64,7 +70,10 @@ public class SecurityConfig {
                             response.setContentType("application/json;charset=UTF-8");
                             response.getWriter()
                                     .write(mapper.writeValueAsString(responseBody));
-                        }));
+                        }))
+                .addFilterBefore(
+                        sessionValidationFilter,
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

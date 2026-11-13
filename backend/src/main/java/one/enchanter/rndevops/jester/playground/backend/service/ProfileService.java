@@ -21,9 +21,17 @@ public class ProfileService {
     @Autowired
     private UserProfileRepository userProfileRepository;
 
-    public UsersEntity getProfile(String sub) {
+    public UsersEntity getProfileByUid(String uid) {
 
-        Optional<UsersEntity> result = userProfileRepository.getUserProfile(sub);
+        Optional<UsersEntity> result = userProfileRepository.getUserProfileByUid(uid);
+
+        return result.orElse(null);
+
+    }
+
+    public UsersEntity getProfile(Long userId) {
+
+        Optional<UsersEntity> result = userProfileRepository.getUserProfile(userId);
 
         return result.orElse(null);
 

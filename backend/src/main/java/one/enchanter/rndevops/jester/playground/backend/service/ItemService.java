@@ -22,8 +22,8 @@ public class ItemService {
      * @param description
      * @return
      */
-    public ItemsEntity registerItem(String sub, String name, String description) {
-        return itemsRepository.registerItem(sub, name, description);
+    public ItemsEntity registerItem(Long userId, String name, String description) {
+        return itemsRepository.registerItem(userId, name, description);
     }
 
     /**
@@ -42,8 +42,8 @@ public class ItemService {
      * @param description
      * @return
      */
-    public boolean updateItem(long id, String name, String description) {
-        return itemsRepository.updateItem(id, name, description);
+    public boolean updateItem(long id, String name, String description, long userId) {
+        return itemsRepository.updateItem(id, name, description, userId);
     }
 
     /**

@@ -11,11 +11,11 @@ import lombok.Data;
 @AllArgsConstructor
 @Data
 public class ItemsUserEntity {
-    Long id;
-    String name;
-    String description;
-    LocalDateTime createdAt;
-    LocalDateTime updatedAt;
-    String sub;
-    String userName;
+    private Long id;
+    private String name;
+    private String description;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private String uid;
+    private String userName;
 }

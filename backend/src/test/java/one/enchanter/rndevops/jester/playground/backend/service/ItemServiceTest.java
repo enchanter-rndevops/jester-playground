@@ -17,7 +17,7 @@ import one.enchanter.rndevops.jester.playground.backend.domain.extension.entity.
 import one.enchanter.rndevops.jester.playground.backend.domain.extension.repository.ItemsRepository;
 
 /**
- * ItemServiceは、REpositiryの結果を返すだけでロジックが存在しない。
+ * ItemServiceは、Repositoryの結果を返すだけでロジックが存在しない。
  * このような薄いService層ではテストを行わない。
  * 
  */
@@ -42,13 +42,13 @@ public class ItemServiceTest {
 
         when(itemsRepository.getItem(targetId)).thenReturn(mockEntity);
 
-        // Act (実行)
+        // 実行
         ItemsUserEntity result = itemService.getItem(targetId);
 
-        // Assert (検証)
+        // 検証
         Assertions.assertThat(result).isNotNull();
         Assertions.assertThat(result.getId()).isEqualTo(targetId);
-        //
+        // ここに他のフィールドの検証も追加すること
 
         // Repositoryが想定通りに1回呼ばれたかも検証できる
         verify(itemsRepository, times(1)).getItem(targetId);
@@ -57,7 +57,7 @@ public class ItemServiceTest {
     @Test
     @DisplayName("異常系：存在しないIDの場合に例外がスローされること")
     void testGetItem_NotFound() {
-        // Arrange (準備)
+        //
         long targetId = 999L;
         when(itemsRepository.getItem(targetId)).thenReturn(null);
 

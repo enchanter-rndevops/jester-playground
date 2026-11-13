@@ -10,21 +10,21 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemsEntity {
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-10-23T17:14:36.868408553+09:00", comments="Source field: items.id")
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-11-12T16:36:19.124521899+09:00", comments="Source field: items.id")
     private Long id;
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-10-23T17:14:36.868661466+09:00", comments="Source field: items.user_sub")
-    private String userSub;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-11-12T16:36:19.124852811+09:00", comments="Source field: items.user_id")
+    private Long userId;
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-10-23T17:14:36.86882752+09:00", comments="Source field: items.name")
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-11-12T16:36:19.124945773+09:00", comments="Source field: items.name")
     private String name;
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-10-23T17:14:36.869056205+09:00", comments="Source field: items.description")
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-11-12T16:36:19.125092048+09:00", comments="Source field: items.description")
     private String description;
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-10-23T17:14:36.869178444+09:00", comments="Source field: items.created_at")
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-11-12T16:36:19.125523036+09:00", comments="Source field: items.created_at")
     private LocalDateTime createdAt;
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-10-23T17:14:36.869270293+09:00", comments="Source field: items.updated_at")
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", date="2026-11-12T16:36:19.12563284+09:00", comments="Source field: items.updated_at")
     private LocalDateTime updatedAt;
 }

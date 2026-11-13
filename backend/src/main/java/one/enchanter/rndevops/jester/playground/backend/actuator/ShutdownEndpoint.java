@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 /**
  * 外部から停止するactuator.
  * 本番ではactuatorごと無効にすること。
- * 
+ *
  */
 @Component
 @Endpoint(id = "shutdown")

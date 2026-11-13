@@ -28,7 +28,7 @@ public interface ItemsQueryMapper {
                         items.description as description,
                         items.created_at as created_at,
                         items.updated_at as updated_at,
-                        users.sub as sub,
+                        users.uid as uid,
                         users.name as user_name
                     from items
                     left outer join users on items.user_sub = users.sub
@@ -45,7 +45,7 @@ public interface ItemsQueryMapper {
                         items.description as description,
                         items.created_at as created_at,
                         items.updated_at as updated_at,
-                        users.sub as sub,
+                        users.uid as uid,
                         users.name as user_name
                     from items
                     left outer join users on items.user_sub = users.sub

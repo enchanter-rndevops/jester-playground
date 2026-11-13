@@ -26,13 +26,18 @@ import one.enchanter.rndevops.jester.playground.backend.controller.ApiResponse;
 /**
  * ControllerからTs用の型定義を生成。
  * 
- * mavenから実行する。
+ * mavenから実行。
  * $ ./mvnw exec:java@generate-ts
  * 
  * ネストしたDTOも再帰的に生成する。
  * List<T> のジェネリクス対応。
- * Map は any になる。
- * 同じ名前のDTOが複数ある場合、最初に見つかったものを採用する。
+ * Map は any になります。
+ * List<T> は 型<T> になります。
+ * NotNull, NotEmpty, NotBlank がないフィールドは、? が付く。| null が必要かも？
+ * responseのほうにはアノテーションがないので、すべてのフィールドに ?
+ * が付く。Responseで終わるかどうかで判断できなくもないですが、気にしないでください。
+ * 
+ * 同じ名前のDTOが複数ある場合、最初に見つかったものを採用します。
  * 
  */
 //@formatter:off
