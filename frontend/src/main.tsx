@@ -1,31 +1,33 @@
-import { ConfigContext } from "@config/config-context";
-import { loadConfig } from "@config/config-loader";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { mockApiClient } from "@testutils/mock-api-client";
-import { mockQueryClient } from "@testutils/mock-query-client";
-import { apiClient } from "@utils/ApiClient";
-import { queryClient } from "@utils/QueryClient";
-import { Amplify } from "aws-amplify";
-import type { AxiosInstance } from "axios";
-import { createContext, StrictMode, Suspense } from "react";
-import { createRoot } from "react-dom/client";
-import { RouterProvider } from "react-router-dom";
-import { router } from "./router";
+import { ConfigContext } from "@config/config-context"
+import { loadConfig } from "@config/config-loader"
+import { QueryClientProvider } from "@tanstack/react-query"
+import { mockApiClient } from "@testutils/mock-api-client"
+import { mockQueryClient } from "@testutils/mock-query-client"
+import { apiClient } from "@utils/ApiClient"
+import { queryClient } from "@utils/QueryClient"
+import { Amplify } from "aws-amplify"
+import type { AxiosInstance } from "axios"
+import { createContext, StrictMode, Suspense } from "react"
+import { createRoot } from "react-dom/client"
+import { RouterProvider } from "react-router-dom"
+import { router } from "./router"
 
-import "./main.css";
+import { Toast } from "@base-ui/react"
+import { ToastRenderer } from "./components/ToastRenderer"
+import { AuthProvider } from "./context/AuthContext"
+import "./main.css"
 
-const config = await loadConfig();
+const config = await loadConfig()
 
-const savedTheme = localStorage.getItem("theme");
+const savedTheme = localStorage.getItem("theme")
 
 if (savedTheme) {
-  document.documentElement.setAttribute("data-theme", savedTheme);
+  document.documentElement.setAttribute("data-theme", savedTheme)
 }
 
 const client =
-  import.meta.env.VITE_USE_MOCK === "true" ? mockQueryClient : queryClient;
-const api =
-  import.meta.env.VITE_USE_MOCK === "true" ? mockApiClient : apiClient;
+  import.meta.env.VITE_USE_MOCK === "true" ? mockQueryClient : queryClient
+const api = import.meta.env.VITE_USE_MOCK === "true" ? mockApiClient : apiClient
 
 Amplify.configure({
   Auth: {
@@ -34,9 +36,9 @@ Amplify.configure({
       userPoolClientId: config.userPoolClientId,
     },
   },
-});
+})
 
-export const ApiClientContext = createContext<AxiosInstance | null>(null);
+export const ApiClientContext = createContext<AxiosInstance | null>(null)
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -44,10 +46,19 @@ createRoot(document.getElementById("root")!).render(
       <Suspense fallback={<></>}>
         <ApiClientContext.Provider value={api}>
           <QueryClientProvider client={client}>
-            <RouterProvider router={router} />
+            <Toast.Provider>
+              <AuthProvider>
+                <RouterProvider router={router} />
+                <Toast.Portal>
+                  <Toast.Viewport className="fixed right-4 bottom-4 z-50 w-96">
+                    <ToastRenderer />
+                  </Toast.Viewport>
+                </Toast.Portal>
+              </AuthProvider>
+            </Toast.Provider>
           </QueryClientProvider>
         </ApiClientContext.Provider>
       </Suspense>
     </ConfigContext.Provider>
   </StrictMode>,
-);
+)

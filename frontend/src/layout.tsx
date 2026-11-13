@@ -1,32 +1,33 @@
 // src/layout.tsx
 // import { Tabs } from "@base-ui/react";
 //import { useNavigate, useLocation } from "react-router-dom";
-import { Button } from "@base-ui/react";
-import { useState } from "react";
-import { Link, Outlet } from "react-router-dom";
-import { setMockError } from "./__tests__/utils/mock-query-client";
-import { LoginDialog } from "./dialogs/LoginDialog";
+import { Button } from "@base-ui/react"
+import { UserInfo } from "@components/UserInfo"
+import { useState } from "react"
+import { Link, Outlet } from "react-router-dom"
+import { setMockError } from "./__tests__/utils/mock-query-client"
+import { LoginDialog } from "./dialogs/LoginDialog"
 
 // 成功パターン
-setMockError(false);
+setMockError(false)
 
 // 失敗パターン
-setMockError(true);
+setMockError(true)
 
 const applyTheme = (themeName: "default" | "light" | "dark" | "MSX1") => {
   if (themeName === "default") {
-    document.documentElement.removeAttribute("data-theme");
-    localStorage.removeItem("theme");
+    document.documentElement.removeAttribute("data-theme")
+    localStorage.removeItem("theme")
   } else {
-    document.documentElement.setAttribute("data-theme", themeName);
-    localStorage.setItem("theme", themeName);
+    document.documentElement.setAttribute("data-theme", themeName)
+    localStorage.setItem("theme", themeName)
   }
-};
+}
 
 export function Layout() {
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false)
 
-  console.log(dialogOpen);
+  console.log(dialogOpen)
 
   /*
   Tabsを使ってパスごとにヘッダを変更。
@@ -39,7 +40,7 @@ export function Layout() {
 
   // MOCKを有効にする。
   const useMock =
-    import.meta.env.VITE_USE_MOCK === "true" ? "MOCK IN USE. " : "";
+    import.meta.env.VITE_USE_MOCK === "true" ? "MOCK IN USE. " : ""
   const toggleAlwaysError =
     import.meta.env.VITE_USE_MOCK !== "true" ? (
       ""
@@ -53,10 +54,10 @@ export function Layout() {
           OFF
         </Button>
       </>
-    );
+    )
 
   // LOCAL開発モード
-  const localenv = import.meta.env.VITE_LOCAL === "true" ? "LOCAL MODE. " : "";
+  const localenv = import.meta.env.VITE_LOCAL === "true" ? "LOCAL MODE. " : ""
 
   return (
     <>
@@ -71,7 +72,13 @@ export function Layout() {
             <div className="basis-2/16">
               <Button onClick={() => setDialogOpen(true)}>Sign in</Button>
             </div>
+            <div>
+              <UserInfo />
+            </div>
             <div className="basis-2/16">
+              <Button className="" onClick={() => applyTheme("default")}>
+                default
+              </Button>
               <Button className="" onClick={() => applyTheme("light")}>
                 light
               </Button>
@@ -88,9 +95,9 @@ export function Layout() {
           {/* --- Main Area: Left Menu + Content --- */}
           <div className="main-leftside-area flex h-full flex-1 overflow-hidden">
             {/* Left Menu */}
-            <aside className="w-64 overflow-auto border-r border-gray-200 p-4">
+            <aside className="w-64 overflow-auto border-r">
               <div>左メニュー</div>
-              
+
               <div>
                 <Link to={"/"}>HOME</Link>
               </div>
@@ -114,5 +121,5 @@ export function Layout() {
         </footer>
       </div>
     </>
-  );
+  )
 }

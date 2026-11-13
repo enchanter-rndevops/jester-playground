@@ -1,7 +1,7 @@
 // import { ConfigContext } from "@config/config-context";
 // import { useContext } from "react";
 
-import { Button, Tabs } from "@base-ui/react";
+import { Button, Tabs } from "@base-ui/react"
 
 export default function About() {
   //  const config = useContext(ConfigContext);
@@ -16,10 +16,10 @@ export default function About() {
         <Button onClick={() => {}}>ボタン1</Button>
       </div>
       <div>
-        <div className="textarea-severity-success">SUCESS TEXT AREA</div>
-        <div className="textarea-severity-info">INFO TEXT AREA</div>
-        <div className="textarea-severity-warning">WARNING TEXT AREA</div>
-        <div className="textarea-severity-error">ERROR TEXT AREA</div>
+        <div className="severity-success">SUCESS TEXT AREA</div>
+        <div className="severity-info">INFO TEXT AREA</div>
+        <div className="severity-warning">WARNING TEXT AREA</div>
+        <div className="severity-error">ERROR TEXT AREA</div>
       </div>
       <div>
         <Tabs.Root defaultValue="overview">
@@ -43,5 +43,5 @@ export default function About() {
         </Tabs.Root>
       </div>
     </div>
-  );
+  )
 }

@@ -18,7 +18,7 @@
   --accent-color-7: #859900; /* green   */
 
   --primary-background-color: var(--background-tone-1);
-  --secondary-background-color: var(--background-tone2);
+  --secondary-background-color: var(--background-tone-2);
   --primary-foreground-color: var(--content-tone-3);
   --secondary-foreground-color: var(--content-tone-4);
 

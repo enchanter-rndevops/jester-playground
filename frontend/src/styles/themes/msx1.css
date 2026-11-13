@@ -17,20 +17,39 @@
   --msx-gray: #ccc3cc;
   --msx-white: #ffffff;
 
-  /* ページ内で使用する色の定義。 */
-  --primary-background-color: var(--msx-dark-blue);
-  --secondary-background-color: var(--msx-light-blue);
-  --primary-foreground-color: var(--msx-white);
-  --secondary-foreground-color: var(--msx-gray);
+  /* コンポーネント内はこの色を使用する。 */
+  --background-tone-01: var(--msx-dark-blue);
+  --background-tone-02: var(--msx-dark-blue);
+  --content-tone-1: var(--msx-white);
+  --content-tone-2: var(--msx-white);
+  --content-tone-3: var(--msx-white);
+  --content-tone-4: var(--msx-white);
+  --background-tone-1: var(--msx-dark-blue);
+  --background-tone-2: var(--msx-dark-blue);
 
-  --color-success: var(--msx-light-green);
-  --color-info: var(--msx-light-blue);
-  --color-warning: var(--msx-light-red);
-  --color-error: var(--msx-dark-red);
-  --color-danger: var(--msx-dark-red);
-  --color-fatal: var(--msx-dark-red);
+  --accent-color-0: var(--msx-light-green);
+  --accent-color-1: var(--msx-light-yellow);
+  --accent-color-2: var(--msx-medium-red);
+  --accent-color-3: var(--msx-magenta);
+  --accent-color-4: var(--msx-light-blue);
+  --accent-color-5: var(--msx-cyan);
+  --accent-color-6: var(--msx-medium-green);
+  --accent-color-7: var(--msx-white);
 
-  /* UIテーマ割り当て(テーマカラーの上書き)   */
+  --primary-background-color: var(--background-tone-01);
+  --secondary-background-color: var(--background-tone-02);
+  --primary-foreground-color: var(--content-tone-1);
+  --secondary-foreground-color: var(--content-tone-2);
+
+  /* コンポーネントなどで使用する意味からつける色。*/
+  --color-success: var(--accent-color-0);
+  --color-info: var(--accent-color-4);
+  --color-warning: var(--accent-color-1);
+  --color-error: var(--accent-color-2);
+  --color-danger: var(--accent-color-2);
+  --color-fatal: var(--accent-color-2);
+
+  /* UIテーマ割り当て  */
   --font-mono: "Press Start 2P", monospace;
   --font-sans: "DotGothic16", sans-serif;
 
@@ -52,9 +71,6 @@
     margin: 1em;
   }
 
-  /* 
-  ネイティブタグのデフォルトスタイルを直接変更する。
-  */
   button {
     font-family: inherit;
     background-color: var(--secondary-background-color);
@@ -74,12 +90,5 @@
     background-color: var(--msx-dark-blue);
     color: var(--msx-white);
     border: 2px solid var(--msx-cyan);
-  }
-
-  /*
-   * @utility button-large の設定を上書きする。
-   */
-  .button-large {
-    font-size: xx-large;
   }
 }

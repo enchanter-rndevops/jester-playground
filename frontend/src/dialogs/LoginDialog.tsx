@@ -1,9 +1,9 @@
-import { Dialog } from "@base-ui/react";
-import LoginForm from "./LoginForm";
+import { Dialog } from "@base-ui/react"
+import LoginForm from "./LoginForm"
 
 export function LoginDialog(props: Dialog.Root.Props) {
-  const open = props.open;
-  const setDialogOpen = props.onOpenChange;
+  const open = props.open
+  const setDialogOpen = props.onOpenChange
 
   return (
     <>
@@ -24,5 +24,5 @@ export function LoginDialog(props: Dialog.Root.Props) {
         </Dialog.Portal>
       </Dialog.Root>
     </>
-  );
+  )
 }

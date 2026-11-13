@@ -3,8 +3,11 @@
 # 開発環境のみで使う値はここに設定するのではなく、npm run dev で起動するときに環境変数を指定するようにしたほうがいいでしょう。
 # AWSの環境では、CloudFrontがホストするため、環境変数をつかうことができません。そのため、AWS上では起動時にこのファイルから読み込むようになっています。
 
+# CognitoはAWS上のものを使用する。local環境ではITokenの検証を行わない
+# Cogintoにlocakユーザーを作成する必要がある。
+# ローカル用に認証なしでIDTokenを返すものを作成してもいい。
 env: local
-apiBaseUrl: /api/vi/
-cognitoUrl: no-cognito
-userPoolId: no-user-poool-id
-userPoolClientId: no-client-id
+apiBaseUrl: /api/v1/
+authority: https://cognito-idp.ap-northeast-1.amazonaws.com/ap-northeast-1_OgaYp5bZA
+userPoolId: ap-northeast-1_OgaYp5bZA
+userPoolClientId: 6d0hpf8q6tb3lmmcerberi3969

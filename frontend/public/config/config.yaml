@@ -1,1 +1,4 @@
 env: dev
+authority: localhost
+userPoolId: local-userpool-id
+userPoolClientId: local-client-id
