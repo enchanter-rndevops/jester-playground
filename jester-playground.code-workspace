@@ -32,19 +32,18 @@
     },
     "java.configuration.updateBuildConfiguration": "automatic",
     "java.import.maven.disableTestClasspathFlag": false,
-    "notebook.defaultFormatter": "esbenp.prettier-vscode",
-    "java.format.enabled": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "java.format.settings.url": "file://${workspaceFolder}/eclipse-java-style.xml",
-    "java.format.settings.profile": "GoogleStyle",
     "[java]": {
       "editor.defaultFormatter": "redhat.java",
       "editor.tabSize": 4,
       "editor.insertSpaces": true,
-      "editor.detectIndentation": false
+      "editor.detectIndentation": false,
+    },
+    "[javascript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
     },
     "[json]": {
-      "editor.defaultFormatter": "vscode.json-language-features",
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
     },
     "[xml]": {
       "editor.defaultFormatter": "redhat.vscode-xml",
@@ -62,7 +61,7 @@
       "editor.defaultFormatter": "esbenp.prettier-vscode",
     },
     "java.completion.importOrder": ["java", "javax", "org", "com"],
-    // プラグインがないと警告が出るらしい。
+    // プラグインがないと警告が出る。
     // 警告が出たら、プラグインをインストールすること。
     // npm install -g prettier prettier-plugin-tailwindcss
     "prettier.requireConfig": true,
@@ -78,6 +77,10 @@
     "java.debug.settings.hotCodeReplace": "auto",
     "java.jdt.ls.javac.enabled": "on",
     "outline.showNull": false,
+    "notebook.defaultFormatter": "esbenp.prettier-vscode",
+    "java.format.settings.profile": "google",
+    "java.format.settings.url": "eclipse-java-google-style.xml",
+    "java.debug.settings.onBuildFailureProceed": true,
 
     // "hediet.vscode-drawio.resizeImages": false,
   },
@@ -94,7 +97,7 @@
       "ms-playwright.playwright",
       "redhat.vscode-xml",
       "esbenp.prettier-vscode",
-      "ms-azuretools.vscode-docker"
+      "ms-azuretools.vscode-docker",
     ],
   },
 }

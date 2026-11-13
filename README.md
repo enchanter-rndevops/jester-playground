@@ -324,7 +324,7 @@ Authorization リクエストヘッダは存在しない。
 CloudFront
   + S3 (Reactで生成したページ。認証不要)
   + S3 Loginページ -> Cognito  (認証)
-    + ECS IDTokenの検証(/api/session/loginのみ)。HTTPセッション生成。
+    + ECS IDTokenの検証(/api/v1/session/loginのみ)。HTTPセッション生成。
     + EES 認可情報を参照し認可を行う。処理を行い、結果を返す。帳票などのファイルダウンロードは署名付きURLを返す。
       + Lambda ECSからLambdaを直接実行する（ECSに負荷をかけたくない場合に使用する）。
       + SQS
