@@ -1,7 +1,8 @@
 ./local
 *.local
-.github/
 
 *.jar
+
+/index.md
 
 node_modules/
