@@ -14,6 +14,7 @@
 - [Jester Playgorund E2Eテスト](e2e/README.md)
 - [Flywayを使ってシンプルマイグレーション](flyway/README.md)
 - [React + TypeScript + Vite](frontend/README.md)
+- [BaseUIラッパー](frontend/src/components/baseui/README.md)
 
 ---
 
