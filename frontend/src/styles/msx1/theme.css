@@ -1,3 +1,20 @@
+/* 
+ * コンポーネントのテーマスタイルはコンポーネントごとに作成する。
+ * 
+ * デフォルトスタイルの
+ *   * 基本色 - 背景、コンテント
+ *   * フォント
+ *   * 共通のバリアントスタイル
+ * を再定義したり、新しいスタイルを設定する。
+ + コンポーネントのスタイルは、<コンポーネント名>.css ファイルに作成し、impotすること。
+ * ファイルサイズが大きくなる場合、適切に分割すること。
+ */
+
+@import "./button.css" layer(themes);
+
+/*
+ * テーマ
+ */
 [data-theme="MSX1"] {
   /* MSXっぽいカラー定義。この色の定義は、このcssファイル内でのみ使用可能。 */
   --msx-transparent: transparent;
@@ -17,7 +34,6 @@
   --msx-gray: #ccc3cc;
   --msx-white: #ffffff;
 
-  /* コンポーネント内はこの色を使用する。 */
   --background-tone-01: var(--msx-dark-blue);
   --background-tone-02: var(--msx-dark-blue);
   --content-tone-1: var(--msx-white);
@@ -41,7 +57,6 @@
   --primary-foreground-color: var(--content-tone-1);
   --secondary-foreground-color: var(--content-tone-2);
 
-  /* コンポーネントなどで使用する意味からつける色。*/
   --color-success: var(--accent-color-0);
   --color-info: var(--accent-color-4);
   --color-warning: var(--accent-color-1);
@@ -71,17 +86,10 @@
     margin: 1em;
   }
 
-  button {
-    font-family: inherit;
-    background-color: var(--secondary-background-color);
-    color: var(--primary-foreground-color);
-    border: 2px solid var(--primary-foreground-color);
-  }
-
   code {
     font-family: var(--font-sans);
     background-color: var(--msx-dark-blue);
-    color: var(--msx-white);
+    color: var(--msx-gray);
     border: 2px solid var(--msx-cyan);
   }
 

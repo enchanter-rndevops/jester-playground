@@ -1,0 +1,8 @@
+[data-theme="MSX1"] {
+  .Button {
+    font-family: inherit;
+    background-color: var(--secondary-background-color);
+    color: var(--msx-gray);
+    border: 2px solid var(--primary-foreground-color);
+  }
+}

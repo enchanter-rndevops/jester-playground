@@ -1,0 +1,97 @@
+/* Select全体の基本スタイル */
+.Select.Root {
+  font-family: inherit;
+  display: inline-block;
+}
+
+/* トリガー（プルダウンを開くボタン部分） */
+.Select.Trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  min-width: 160px;
+  background-color: var(--secondary-background-color);
+  color: var(--primary-foreground-color);
+  border: 2px solid var(--content-tone-3);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
+}
+
+.Select.Trigger:hover {
+  border-color: var(--accent-color-5); /* ホバー時はブルー系のアクセント */
+  background-color: var(--background-tone-1);
+}
+
+.Select.Trigger:focus-visible {
+  outline: none;
+  border-color: var(--accent-color-6); /* フォーカス時はシアン系のアクセント */
+}
+
+/* アイコン部分 */
+.Select.Icon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  color: var(--content-tone-2);
+}
+
+/* ポップアップ（ドロップダウンメニューのコンテナ） */
+.Select.Popup {
+  z-index: 1000;
+  min-width: var(--available-width);
+  background-color: var(--background-tone-02);
+  color: var(--background-tone-2);
+  border: 2px solid var(--content-tone-3);
+  border-radius: 4px;
+  padding: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  outline: none;
+}
+
+/* リストアイテム */
+.Select.Item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--background-tone-2);
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+
+/* ホバー時 / 選択ハイライト時 */
+.Select.Item[data-highlighted] {
+  background-color: var(--accent-color-5);
+  color: var(--background-tone-2);
+  outline: none;
+}
+
+/* 選択済みアイテムのスタイル */
+.Select.Item[data-selected] {
+  background-color: var(--background-tone-01);
+  color: var(--accent-color-0); /* 選択時はイエロー系アクセント */
+  font-weight: bold;
+}
+
+/* アイテムのテキスト部分 */
+.Select.ItemText {
+  flex-grow: 1;
+}
+
+/* 選択中インジケーター（チェックマークなど） */
+.Select.ItemIndicator {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  color: var(--accent-color-0);
+}

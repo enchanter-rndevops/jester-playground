@@ -1,3 +1,7 @@
+/*
+ * backendで自動生成されたものをここに配置する。
+ */
+
 export interface ApiResponse<T> {
   severity: Severity
   message: string
@@ -17,4 +21,4 @@ export interface WhoamiResponseData {
   name: string
 }
 
-export type Severity = "SUCCESS" | "ERROR" | "WARN" | "INFO"
+export type Severity = "SUCCESS" | "ERROR" | "WARNING" | "INFO"

@@ -1,14 +1,14 @@
 import { useAuth } from "../hooks/useAuth"
 
-export function UserInfo() {
+export function UserInfo(props: any) {
   const { user } = useAuth()
 
   if (!user) {
-    return <div>未ログイン</div>
+    return <div className={`UserInfo ${props.className}`}>未ログイン</div>
   }
 
   return (
-    <div>
+    <div className={`UserInfo ${props.className}`}>
       {user.name}（{user.email}）
     </div>
   )

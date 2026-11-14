@@ -2,6 +2,7 @@
 // import { Tabs } from "@base-ui/react";
 //import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@base-ui/react"
+import { Select } from "@components/baseui/select"
 import { UserInfo } from "@components/UserInfo"
 import { useState } from "react"
 import { Link, Outlet } from "react-router-dom"
@@ -14,13 +15,15 @@ setMockError(false)
 // 失敗パターン
 setMockError(true)
 
-const applyTheme = (themeName: "default" | "light" | "dark" | "MSX1") => {
+const applyTheme = (themeName: unknown) => {
+  const theme = themeName as string
+
   if (themeName === "default") {
     document.documentElement.removeAttribute("data-theme")
     localStorage.removeItem("theme")
   } else {
-    document.documentElement.setAttribute("data-theme", themeName)
-    localStorage.setItem("theme", themeName)
+    document.documentElement.setAttribute("data-theme", theme)
+    localStorage.setItem("theme", theme)
   }
 }
 
@@ -70,25 +73,14 @@ export function Layout() {
               <h1>Jester Playground.</h1>
             </div>
             <div className="basis-2/16">
-              <Button onClick={() => setDialogOpen(true)}>Sign in</Button>
+              <Button className="Button" onClick={() => setDialogOpen(true)}>
+                Sign in
+              </Button>
             </div>
             <div>
               <UserInfo />
             </div>
-            <div className="basis-2/16">
-              <Button className="" onClick={() => applyTheme("default")}>
-                default
-              </Button>
-              <Button className="" onClick={() => applyTheme("light")}>
-                light
-              </Button>
-              <Button className="" onClick={() => applyTheme("dark")}>
-                dark
-              </Button>
-              <Button className="" onClick={() => applyTheme("MSX1")}>
-                MSX1
-              </Button>
-            </div>
+            <SelectTheme />
           </div>
         </header>
         <main className="main-area h-full overflow-auto pt-16 pb-16">
@@ -121,5 +113,42 @@ export function Layout() {
         </footer>
       </div>
     </>
+  )
+}
+
+export function SelectTheme() {
+  return (
+    <Select.Root
+      onValueChange={(value: unknown) => {
+        applyTheme(value)
+      }}
+    >
+      <Select.Trigger>
+        <Select.Value placeholder="テーマ" />
+        <Select.Icon>▼</Select.Icon>
+      </Select.Trigger>
+      <Select.Portal>
+        <Select.Positioner>
+          <Select.Popup>
+            <Select.Item value="default">
+              <Select.ItemText>デフォルト</Select.ItemText>
+              <Select.ItemIndicator>✓</Select.ItemIndicator>
+            </Select.Item>
+            <Select.Item value="light">
+              <Select.ItemText>ライト</Select.ItemText>
+              <Select.ItemIndicator>✓</Select.ItemIndicator>
+            </Select.Item>
+            <Select.Item value="dark">
+              <Select.ItemText>ダーク</Select.ItemText>
+              <Select.ItemIndicator>✓</Select.ItemIndicator>
+            </Select.Item>
+            <Select.Item value="MSX1">
+              <Select.ItemText>MSX1</Select.ItemText>
+              <Select.ItemIndicator>✓</Select.ItemIndicator>
+            </Select.Item>
+          </Select.Popup>
+        </Select.Positioner>
+      </Select.Portal>
+    </Select.Root>
   )
 }

@@ -1,0 +1,24 @@
+/*
+ * Toast
+ */
+
+.Toast.Root {
+  border: 2px solid var(--primary-foreground-color);
+  background-color: var(--secondary-background-color);
+  color: var(--color-warning);
+}
+
+.Toast.Content {
+  background-color: var(--secondary-background-color);
+  color: var(--secondary-foreground-color);
+}
+
+.Toast.Description {
+  background-color: var(--secondary-background-color);
+  color: var(--secondary-foreground-color);
+}
+
+.Toast.Close {
+  background-color: var(--secondary-background-color);
+  color: var(--secondary-foreground-color);
+}

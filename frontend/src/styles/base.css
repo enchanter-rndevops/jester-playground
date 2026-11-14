@@ -1,0 +1,7 @@
+@layer reset, base, themes;
+
+/* テーマをimportする。 */
+@import "./default/theme.css";
+@import "./light/theme.css";
+@import "./dark/theme.css";
+@import "./msx1/theme.css";

@@ -1,0 +1,114 @@
+/*
+ * デフォルトスタイル
+ *
+ * ページ、コンポーネントで使用するスタイルはここにある
+ *   * 基本色 - 背景、コンテント
+ *   * フォント
+ *   * 共通のバリアントスタイル
+ * を使用すること。
+ */
+@layer reset, base, themes;
+
+@import "./button.css" layer(base);
+@import "./select.css" layer(base);
+@import "./toast.css" layer(base);
+
+@import "./userinfo.css" layer(base);
+
+@layer base {
+  /* 基本色 - 背景、コンテント */
+  :root {
+    --background-tone-01: #000000; /* base03 */
+    --background-tone-02: #444444; /* base02 */
+    --content-tone-1: #666666; /* base01 */
+    --content-tone-2: #777777; /* base00 */
+    --content-tone-3: #888888; /* base0  */
+    --content-tone-4: #999999; /* base1  */
+    --background-tone-1: #cccccc; /* base2  */
+    --background-tone-2: #ffffff; /* base3  */
+
+    --accent-color-0: #b58900; /* yellow  */
+    --accent-color-1: #cb4b16; /* orange  */
+    --accent-color-2: #dc322f; /* red     */
+    --accent-color-3: #d33682; /* magenta */
+    --accent-color-4: #6c71c4; /* violet  */
+    --accent-color-5: #268bd2; /* blue    */
+    --accent-color-6: #2aa198; /* cyan    */
+    --accent-color-7: #859900; /* green   */
+
+    --primary-background-color: var(--background-tone-1);
+    --secondary-background-color: var(--background-tone2);
+    --primary-foreground-color: var(--content-tone-1);
+    --secondary-foreground-color: var(--content-tone-2);
+
+    --color-success: var(--accent-color-7);
+    --color-info: var(--accent-color-5);
+    --color-warning: var(--accent-color-1);
+    --color-error: var(--accent-color-2);
+    --color-danger: var(--accent-color-3);
+    --color-fatal: var(--accent-color-3);
+
+    /*
+     * フォント
+     */
+    --font-sans:
+      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+      "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+      "Segoe UI Symbol", "Noto Color Emoji";
+    --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+    --font-mono:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace;
+  }
+
+  /*
+   * 共通のバリアントスタイル
+   */
+  .severity-success {
+    color: var(--color-success);
+    background-color: var(--secondary-background-color);
+  }
+  .severity-info {
+    color: var(--color-info);
+    background-color: var(--secondary-background-color);
+  }
+  .severity-warning {
+    color: var(--color-warning);
+    background-color: var(--secondary-background-color);
+  }
+  .severity-error {
+    color: var(--color-error);
+    background-color: var(--secondary-background-color);
+  }
+
+  /*
+   * デフォルトHTMLエレメントのスタイル
+   */
+  header {
+    font-family: inherit;
+    background-color: var(--secondary-background-color);
+    color: var(--primary-foreground-color);
+    border: 2px solid var(--primary-foreground-color);
+  }
+
+  main {
+    font-family: inherit;
+    background-color: var(--secondary-background-color);
+    color: var(--primary-foreground-color);
+    border: 2px solid var(--primary-foreground-color);
+  }
+
+  footer {
+    font-family: inherit;
+    background-color: var(--secondary-background-color);
+    color: var(--primary-foreground-color);
+    border: 2px solid var(--primary-foreground-color);
+  }
+
+  aside {
+    font-family: inherit;
+    background-color: var(--secondary-background-color);
+    color: var(--primary-foreground-color);
+    border: 2px solid var(--primary-foreground-color);
+  }
+}

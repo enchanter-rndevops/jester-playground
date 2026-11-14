@@ -1,0 +1,6 @@
+.Button {
+  font-family: inherit;
+  background-color: var(--secondary-background-color);
+  color: var(--primary-foreground-color);
+  border: 1px solid var(--primary-foreground-color);
+}
